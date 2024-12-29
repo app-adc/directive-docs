@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [vue()],
-    base: '/vue-docs/',
+    base: '/directives-docs/',
     server: {
         port: 3000,
         watch: {
