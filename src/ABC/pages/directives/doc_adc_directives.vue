@@ -5,11 +5,269 @@ import BcInput from '@/ABC/components/BcInput.vue'
 import BcLayout from '@/ABC/pages/bc_doc_layout.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+onMounted(() => {
+    handleExampleChange('toCombineText')
+})
 
+// สำหรับ Interactive Playground
+type ExampleKey = keyof typeof examples
+const selectedExample = ref<ExampleKey>('toCombineText')
+const codeInput = ref('')
+
+// ตัวอย่างโค้ดสำหรับ playground
+// ตัวอย่างโค้ดสำหรับ playground
+const examples = {
+    // Array Utilities
+    mapArray: {
+        template: `import { mapArray } from 'adc-directive'
+
+const result = mapArray([1, [2, 3, [4, 5, [6]]]])
+// Expected: [1, 2, 3, 4, 5, 6]`,
+        description: 'แปลง nested array ให้เป็น flat array',
+    },
+    chunkArray: {
+        template: `import { chunkArray } from 'adc-directive'
+
+const result = chunkArray([1, 2, 3, 4, 5], 2)
+// Expected: [[1,2], [3,4], [5]]`,
+        description: 'แบ่ง array เป็นชุดตามจำนวนที่กำหนด',
+    },
+    checkItemDuplicate: {
+        template: `import { checkItemDuplicate } from 'adc-directive'
+
+const users = [
+  { name: 'John', id: 1 },
+  { name: 'John', id: 2 }
+]
+const result = checkItemDuplicate(users, user => user.name)
+// Expected: true`,
+        description: 'ตรวจสอบค่าซ้ำใน array',
+    },
+    toChangePositionArray: {
+        template: `import { toChangePositionArray } from 'adc-directive'
+
+const result = toChangePositionArray(['A', 'B', 'C'])
+// Expected: ['B', 'C', 'A'] (random position)`,
+        description: 'สลับตำแหน่งข้อมูลใน array แบบสุ่ม',
+    },
+
+    // String Utilities
+    toCombineText: {
+        template: `import { toCombineText } from 'adc-directive'
+
+const result = toCombineText(['a', 'b', null, 'c'], '_')
+// Expected: a_b_c`,
+        description: 'รวม Array เป็น string ด้วยตัวคั่นที่กำหนด',
+    },
+    toHasKey: {
+        template: `import { toHasKey } from 'adc-directive'
+
+const result = toHasKey('User-Name__123 !@#')
+// Expected: username_123`,
+        description: 'ลบอักขระพิเศษและช่องว่าง เหมาะสำหรับใช้เป็น key',
+    },
+    toReplaceTextByRegExp: {
+        template: `import { toReplaceTextByRegExp } from 'adc-directive'
+
+const result = toReplaceTextByRegExp('Hello123World!', ['en', 'number'])
+// Expected: 'Hello123World'`,
+        description: 'แทนที่ข้อความด้วย RegExp pattern',
+    },
+
+    // Date Utilities
+    dateDiff: {
+        template: `import { dateDiff } from 'adc-directive'
+
+const result = dateDiff(new Date('2024-01-01'), new Date('2024-01-15'))
+// Expected: { days: 14, hours: 0, minutes: 0, seconds: 0 }`,
+        description: 'คำนวณความต่างระหว่างวันที่',
+    },
+    addDate: {
+        template: `import { addDate } from 'adc-directive'
+
+const result = addDate(new Date('2024-01-01'), 7)
+// Expected: 2024-01-08`,
+        description: 'เพิ่มหรือลดจำนวนวัน',
+    },
+    addMonth: {
+        template: `import { addMonth } from 'adc-directive'
+
+const result = addMonth(new Date('2024-01-01'), 2)
+// Expected: 2024-03-01`,
+        description: 'เพิ่มหรือลดจำนวนเดือน',
+    },
+    addHour: {
+        template: `import { addHour } from 'adc-directive'
+
+const result = addHour(new Date('2024-01-01 10:00'), 3)
+// Expected: 2024-01-01 13:00`,
+        description: 'เพิ่มหรือลดจำนวนชั่วโมง',
+    },
+    addMinute: {
+        template: `import { addMinute } from 'adc-directive'
+
+const result = addMinute(new Date('2024-01-01 10:00'), 30)
+// Expected: 2024-01-01 10:30`,
+        description: 'เพิ่มหรือลดจำนวนนาที',
+    },
+    dateToCombine: {
+        template: `import { dateToCombine } from 'adc-directive'
+
+const result = dateToCombine(new Date('2024-01-01'))
+// Expected: {
+//   valueOfDate: '2024-01-01',
+//   valueOfTime: '00:00:00',
+//   valueOfValue: '2024-01-01 00:00:00',
+//   th: '1 มกราคม 2567'
+// }`,
+        description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
+    },
+
+    // Object Utilities
+    mergeObject: {
+        template: `import { mergeObject } from 'adc-directive'
+
+const result = mergeObject(
+  { a: 1, b: { c: 2 } },
+  { b: { d: 3 }, e: 4 }
+)
+// Expected: { a: 1, b: { c: 2, d: 3 }, e: 4 }`,
+        description: 'รวม objects แบบ deep merge',
+    },
+    findObjectByKey: {
+        template: `import { findObjectByKey } from 'adc-directive'
+
+const obj = { user: { profile: { name: 'John' } } }
+const result = findObjectByKey(obj, ['user.profile.name'])
+// Expected: true`,
+        description: 'ค้นหา key ใน object แบบ nested',
+    },
+    selectObject: {
+        template: `import { selectObject } from 'adc-directive'
+
+const obj = { id: 1, name: 'John', age: 30 }
+const result = selectObject(obj, ['id', 'name'])
+// Expected: { id: 1, name: 'John' }`,
+        description: 'เลือกเฉพาะ keys ที่ต้องการ',
+    },
+    checkNestedValue: {
+        template: `import { checkNestedValue } from 'adc-directive'
+
+const data = {
+  colors: ['red', 'blue'],
+  user: { name: 'John' }
+}
+const result = checkNestedValue(data, {
+  colors: ['red', 'blue'],
+  'user.name': 'John'
+})
+// Expected: true`,
+        description: 'ตรวจสอบค่าใน nested object',
+    },
+
+    // Number Utilities
+    toNumber: {
+        template: `import { toNumber } from 'adc-directive'
+
+const result1 = toNumber('123')    // Expected: 123
+const result2 = toNumber('abc')    // Expected: 0
+const result3 = toNumber(null)     // Expected: 0`,
+        description: 'แปลงค่าเป็นตัวเลข',
+    },
+    toCurrency: {
+        template: `import { toCurrency } from 'adc-directive'
+
+const result = toCurrency(1234567.89, 2)
+// Expected: '1,234,567.89'`,
+        description: 'จัดรูปแบบตัวเลขให้อยู่ในรูปแบบเงิน',
+    },
+    toRandomNumber: {
+        template: `import { toRandomNumber } from 'adc-directive'
+
+const result = toRandomNumber(1, 100)
+// Expected: random number between 1-100`,
+        description: 'สุ่มตัวเลขในช่วงที่กำหนด',
+    },
+
+    // Validation Utilities
+    checkEmpty: {
+        template: `import { checkEmpty } from 'adc-directive'
+
+const result1 = checkEmpty('')     // Expected: true
+const result2 = checkEmpty([])     // Expected: true
+const result3 = checkEmpty({})     // Expected: true
+const result4 = checkEmpty('abc')  // Expected: false`,
+        description: 'ตรวจสอบค่าว่าง',
+    },
+    checkObject: {
+        template: `import { checkObject } from 'adc-directive'
+
+const result1 = checkObject({})        // Expected: true
+const result2 = checkObject([])        // Expected: false
+const result3 = checkObject(null)      // Expected: false`,
+        description: 'ตรวจสอบว่าเป็น object',
+    },
+    validateEmail: {
+        template: `import { validateEmail } from 'adc-directive'
+
+const result = validateEmail('test@email.com', {
+  allowEmpty: false,
+  maxLength: 100
+})
+// Expected: { isValid: true, message: '' }`,
+        description: 'ตรวจสอบความถูกต้องของอีเมล',
+    },
+
+    // Composition Utilities
+    ci: {
+        template: `import { ci } from 'adc-directive'
+
+const result = ci(
+  5,
+  x => x + 1,    // 6
+  x => x * 2     // 12
+)
+// Expected: 12`,
+        description: 'Chain/compose functions เข้าด้วยกัน',
+    },
+    withCi: {
+        template: `import { withCi } from 'adc-directive'
+
+const addOne = x => x + 1
+const double = x => x * 2
+
+const compute = withCi(addOne, double)
+const result = compute(5)
+// Expected: 12`,
+        description: 'สร้าง function composition wrapper',
+    },
+
+    // Service Utilities
+    copyDeep: {
+        template: `import { copyDeep } from 'adc-directive'
+
+const obj = { a: 1, b: { c: 2 } }
+const result = copyDeep(obj)
+// Expected: deep copy of object`,
+        description: 'สร้างสำเนาข้อมูลแบบ deep copy',
+    },
+    delayPromise: {
+        template: `import { delayPromise } from 'adc-directive'
+
+// รอ 1 วินาที
+await delayPromise(1000)
+
+// รอแล้วทำงาน callback
+await delayPromise(1000, () => console.log('Done!'))`,
+        description: 'สร้าง Promise ที่ทำงานหลังจากเวลาที่กำหนด',
+    },
+}
+
+// สำหรับการค้นหา
 const route = useRoute()
 const searchQuery = ref('')
 
-// Function to normalize text for case-insensitive search
+// Function สำหรับ normalize ข้อความเพื่อค้นหาแบบไม่สนใจตัวพิมพ์เล็ก/ใหญ่
 const normalizeText = (text: string): string => {
     if (typeof text !== 'string') return ''
     return text.toLowerCase().trim()
@@ -47,190 +305,11 @@ const result = chunkArray(items, 2)
 // result: [[1, 2], [3, 4], [5]]`,
             },
             {
-                name: 'checkItemDuplicate',
-                description: 'ค้นหาค่าซ้ำใน Array โดยใช้ callback function',
-                code: `const users = [
-  { name: 'John', id: 1 },
-  { name: 'John', id: 2 }
-]
-
-// ตรวจสอบชื่อซ้ำ
-const hasDuplicateName = checkItemDuplicate(users, user => user.name)
-// result: true
-
-// ตรวจสอบหลายเงื่อนไข
-const hasDuplicateNameAndId = checkItemDuplicate(
-  users, 
-  user => toCombineText([user.id, user.name])
-)`,
-            },
-            {
                 name: 'toChangePositionArray',
-                description: 'สลับตำแหน่งข้อมูลใน Array',
-                code: `const arr = [1, 2, 3, 4]
-const result = toChangePositionArray(arr, 0, 3) 
-// result: [4, 2, 3, 1]`,
-            },
-        ],
-    },
-    {
-        category: 'Date Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการวันที่และเวลา',
-        functions: [
-            {
-                name: 'addDate',
-                description: 'เพิ่มหรือลดจำนวนวัน',
-                code: `const date = new Date('2024-01-01')
-
-// เพิ่ม 7 วัน
-const futureDate = addDate(date, 7)  
-// result: 2024-01-08
-
-// ลด 3 วัน
-const pastDate = addDate(date, -3)
-// result: 2023-12-29`,
-            },
-            {
-                name: 'addMonth',
-                description: 'เพิ่มหรือลดจำนวนเดือน',
-                code: `const date = new Date('2024-01-15')
-
-// เพิ่ม 2 เดือน
-const futureMonth = addMonth(date, 2)
-// result: 2024-03-15
-
-// ลด 1 เดือน  
-const pastMonth = addMonth(date, -1)
-// result: 2023-12-15`,
-            },
-            {
-                name: 'addHour',
-                description: 'เพิ่มหรือลดจำนวนชั่วโมง',
-                code: `const date = new Date('2024-01-01 10:00:00')
-
-// เพิ่ม 3 ชั่วโมง
-const laterTime = addHour(date, 3)
-// result: 2024-01-01 13:00:00
-
-// ลด 2 ชั่วโมง
-const earlierTime = addHour(date, -2)  
-// result: 2024-01-01 08:00:00`,
-            },
-            {
-                name: 'addMinute',
-                description: 'เพิ่มหรือลดจำนวนนาที',
-                code: `const date = new Date('2024-01-01 10:00:00')
-
-// เพิ่ม 45 นาที
-const laterMinutes = addMinute(date, 45)
-// result: 2024-01-01 10:45:00  
-
-// ลด 30 นาที
-const earlierMinutes = addMinute(date, -30)
-// result: 2024-01-01 09:30:00`,
-            },
-            {
-                name: 'dateDiff',
-                description: 'คำนวณความต่างของเวลาระหว่างสองวันที่',
-                code: `const diff = dateDiff(date1, date2)
-/* returns: {
-  days: number        // จำนวนวัน 
-  hours: number       // จำนวนชั่วโมงคงเหลือ
-  hoursTotal: number  // จำนวนชั่วโมงทั้งหมด
-  minutesTotal: number // จำนวนนาทีทั้งหมด
-  minutes: number     // จำนวนนาทีคงเหลือ
-  seconds: number     // จำนวนวินาทีคงเหลือ
-  secondsTotal: number // จำนวนวินาทีทั้งหมด  
-} */`,
-            },
-            {
-                name: 'dateDiffToString',
-                description: 'แปลงความต่างของเวลาเป็นข้อความภาษาไทยหรืออังกฤษ',
-                code: `// ภาษาไทย
-const diffThai = dateDiffToString(date1, date2, 'th')
-// returns: "2 วัน 3 ชั่วโมง 45 นาที"
-
-// ภาษาอังกฤษ
-const diffEng = dateDiffToString(date1, date2, 'en') 
-// returns: "2 days 3 hours 45 minutes"`,
-            },
-            {
-                name: 'dateToCombine',
-                description: 'แปลงวันที่เป็น string format',
-                code: `const date = new Date('2024-01-15')
-const result = dateToCombine(date)
-// returns: { valueOfDate: '2024-01-15' }`,
-            },
-        ],
-    },
-    {
-        category: 'Object Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ Object',
-        functions: [
-            {
-                name: 'checkObject',
-                description: 'ตรวจสอบ key ใน object (รองรับ nested path)',
-                code: `const payload = {
-  user: {
-    profile: { name: 'John' },
-    orders: [{ id: 1, total: 100 }]
-  }
-}
-
-// ตรวจสอบหลาย paths
-const exists = checkObject(payload, [
-  'user.profile.name',
-  'user.orders[0].total' 
-])
-// result: true`,
-            },
-            {
-                name: 'createObj',
-                description: 'สร้าง object ใหม่จาก key-value pairs',
-                code: `const obj = createObj([
-  ['name', 'John'],
-  ['age', 30]
-])
-// result: { name: 'John', age: 30 }`,
-            },
-            {
-                name: 'mergeObject',
-                description: 'รวม objects แบบ deep merge',
-                code: `const obj1 = { 
-  name: 'John',
-  profile: { color: 'red' }
-}
-
-const obj2 = {
-  profile: { email: 'john@email.com' }  
-}
-
-const merged = mergeObject(obj1, obj2)
-/* result: {
-  name: 'John',
-  profile: {
-    color: 'red', 
-    email: 'john@email.com'
-  }
-} */`,
-            },
-            {
-                name: 'validateObject',
-                description: 'ตรวจสอบความถูกต้องของ object ตาม schema',
-                code: `const payload = { 
-  id: 1,
-  user: {
-    name: 'John',
-    email: 'john@email.com'  
-  } 
-}
-
-const validation = validateObject(
-  payload,
-  ['id', 'user.name', 'user.email'],
-  'Validation Error' 
-)
-// returns: { status: 1, message: 'success' }`,
+                description: 'สลับตำแหน่งข้อมูลใน Array แบบสุ่ม',
+                code: `const arr = ['A', 'B', 'C']
+const result = toChangePositionArray(arr)
+// อาจได้ผลลัพธ์เช่น ['B', 'C', 'A']`,
             },
         ],
     },
@@ -241,27 +320,122 @@ const validation = validateObject(
             {
                 name: 'toCombineText',
                 description: 'รวม Array ของข้อความด้วยตัวคั่นที่กำหนด',
-                code: `// รวมข้อความด้วย delimiter
-const parts = ['John', 'Doe', '30']
-const result1 = toCombineText(parts, ' | ')
-// result: "John | Doe | 30"
-
-// รวมข้อความจากหลายประเภท
-const mixed = ['Product', 123, true]
-const result2 = toCombineText(mixed, '-')
-// result: "Product-123-true"`,
+                code: `const parts = ['a', 'b', null, 'c']
+const result = toCombineText(parts, '_')
+// result: 'a_b_c'`,
             },
             {
                 name: 'toHasKey',
-                description: 'ลบอักขระพิเศษและช่องว่าง สำหรับใช้เป็น key',
-                code: `const text = '  User-Name__123 !@# '
-const key = toHasKey(text)
-// result: 'username_123'
-
-// เหมาะสำหรับแปลงเป็น key ที่ปลอดภัย
-const filename = 'My Document (2024).pdf'
-const safeKey = toHasKey(filename)
-// result: 'mydocument2024pdf'`,
+                description: 'ลบอักขระพิเศษและช่องว่าง เหมาะสำหรับใช้เป็น key',
+                code: `const text = '19-55 77_88*99 aBC'
+const result = toHasKey(text)
+// result: '195577_8899abc'`,
+            },
+            {
+                name: 'toReplaceTextByRegExp',
+                description: 'แทนที่ข้อความด้วย RegExp pattern',
+                code: `const text = 'Hello123World!'
+const result = toReplaceTextByRegExp(text, ['en', 'number'])
+// เก็บเฉพาะตัวอักษรภาษาอังกฤษและตัวเลข`,
+            },
+        ],
+    },
+    {
+        category: 'Date Utilities',
+        description: 'ฟังก์ชันสำหรับจัดการวันที่และเวลา',
+        functions: [
+            {
+                name: 'dateDiff',
+                description: 'คำนวณความต่างของเวลาระหว่างสองวันที่',
+                code: `const diff = dateDiff(date1, date2)
+// returns: {
+//   days: number,
+//   hours: number,
+//   minutes: number,
+//   seconds: number,
+//   milliseconds: number
+// }`,
+            },
+            {
+                name: 'addDate',
+                description: 'เพิ่มหรือลดจำนวนวัน',
+                code: `const date = new Date('2024-01-01')
+const result = addDate(date, 7)
+// เพิ่ม 7 วัน`,
+            },
+            {
+                name: 'addMonth',
+                description: 'เพิ่มหรือลดจำนวนเดือน',
+                code: `const date = new Date('2024-01-01')
+const result = addMonth(date, 3)
+// เพิ่ม 3 เดือน`,
+            },
+            {
+                name: 'addHour',
+                description: 'เพิ่มหรือลดจำนวนชั่วโมง',
+                code: `const date = new Date('2024-01-01 10:00')
+const result = addHour(date, 5)
+// เพิ่ม 5 ชั่วโมง`,
+            },
+            {
+                name: 'addMinute',
+                description: 'เพิ่มหรือลดจำนวนนาที',
+                code: `const date = new Date('2024-01-01 10:00')
+const result = addMinute(date, 30)
+// เพิ่ม 30 นาที`,
+            },
+            {
+                name: 'dateToCombine',
+                description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
+                code: `const date = new Date()
+const result = dateToCombine(date)
+// returns: {
+//   valueOfDate: 'YYYY-MM-DD',
+//   valueOfTime: 'HH:mm:ss',
+//   valueOfValue: 'YYYY-MM-DD HH:mm:ss',
+//   th: 'วันที่ภาษาไทย'
+// }`,
+            },
+        ],
+    },
+    {
+        category: 'Object Utilities',
+        description: 'ฟังก์ชันสำหรับจัดการ Object',
+        functions: [
+            {
+                name: 'mergeObject',
+                description: 'รวม object หลายตัวเข้าด้วยกันแบบ deep merge',
+                code: `const obj1 = { a: 1, b: { c: 2 } }
+const obj2 = { b: { d: 3 }, e: 4 }
+const result = mergeObject(obj1, obj2)
+// result: { a: 1, b: { c: 2, d: 3 }, e: 4 }`,
+            },
+            {
+                name: 'findObjectByKey',
+                description: 'ค้นหา key ใน object แบบ nested',
+                code: `const obj = { user: { profile: { name: 'John' } } }
+const exists = findObjectByKey(obj, ['user.profile.name'])
+// result: true`,
+            },
+            {
+                name: 'selectObject',
+                description: 'เลือกเฉพาะบาง keys จาก object',
+                code: `const obj = { id: 1, name: 'John', age: 30 }
+const result = selectObject(obj, ['id', 'name'])
+// result: { id: 1, name: 'John' }`,
+            },
+            {
+                name: 'checkNestedValue',
+                description: 'ตรวจสอบค่าใน nested object',
+                code: `const obj = { 
+  colors: ['red', 'blue'],
+  user: { name: 'John' }
+}
+const result = checkNestedValue(obj, {
+  colors: ['red', 'blue'],
+  'user.name': 'John'
+})
+// result: true`,
             },
         ],
     },
@@ -273,55 +447,115 @@ const safeKey = toHasKey(filename)
                 name: 'toNumber',
                 description: 'แปลงค่าเป็นตัวเลข',
                 code: `toNumber('123') // 123
-toNumber('12.34') // 12.34
 toNumber('abc') // 0
 toNumber(null) // 0`,
             },
             {
                 name: 'toCurrency',
                 description: 'จัดรูปแบบตัวเลขให้อยู่ในรูปแบบเงิน',
-                code: `// จัดรูปแบบตัวเลขทศนิยม 2 ตำแหน่ง
-const price = 1234567.89
-const formatted = toCurrency(price, 2)
-// result: "1,234,567.89"
-
-// จัดรูปแบบตัวเลขไม่มีทศนิยม
-const wholeNumber = 1000000
-const noDecimal = toCurrency(wholeNumber, 0)
-// result: "1,000,000"`,
+                code: `const num = 1234567.89
+const result = toCurrency(num, 2)
+// result: '1,234,567.89'`,
             },
             {
                 name: 'toRandomNumber',
                 description: 'สุ่มตัวเลขในช่วงที่กำหนด',
-                code: `// สุ่มตัวเลข 1-10
-const random = toRandomNumber(1, 10) 
-// returns: random number between 1-10`,
+                code: `const result = toRandomNumber(1, 100)
+// สุ่มตัวเลขระหว่าง 1-100`,
+            },
+        ],
+    },
+    {
+        category: 'Validation Utilities',
+        description: 'ฟังก์ชันสำหรับตรวจสอบข้อมูล',
+        functions: [
+            {
+                name: 'checkEmpty',
+                description: 'ตรวจสอบค่าว่าง',
+                code: `checkEmpty('') // true
+checkEmpty([]) // true
+checkEmpty({}) // true
+checkEmpty(null) // true
+checkEmpty('abc') // false`,
+            },
+            {
+                name: 'checkObject',
+                description: 'ตรวจสอบว่าเป็น object หรือไม่',
+                code: `checkObject({}) // true
+checkObject([]) // false
+checkObject(null) // false`,
+            },
+            {
+                name: 'checkEmail',
+                description: 'ตรวจสอบรูปแบบอีเมล',
+                code: `checkEmail('test@email.com') // true
+checkEmail('invalid-email') // false`,
+            },
+            {
+                name: 'checkNumber',
+                description: 'ตรวจสอบว่าเป็นตัวเลขหรือไม่',
+                code: `checkNumber(123) // true
+checkNumber('123') // true
+checkNumber('abc') // false`,
+            },
+            {
+                name: 'checkFormatDate',
+                description: 'ตรวจสอบรูปแบบวันที่',
+                code: `checkFormatDate('2024-01-01', 'YYYY-MM-DD') // true
+checkFormatDate('01/01/2024', 'DD/MM/YYYY') // true`,
+            },
+        ],
+    },
+    {
+        category: 'Service Utilities',
+        description: 'ฟังก์ชันสำหรับจัดการ service ต่างๆ',
+        functions: [
+            {
+                name: 'copyDeep',
+                description: 'สร้างสำเนาข้อมูลแบบ deep copy',
+                code: `const obj = { a: 1, b: { c: 2 } }
+const copy = copyDeep(obj)
+// สร้างสำเนาใหม่ทั้งหมด ไม่มีการอ้างอิงถึงข้อมูลเดิม`,
+            },
+            {
+                name: 'delayPromise',
+                description: 'สร้าง Promise ที่จะทำงานหลังจากเวลาที่กำหนด',
+                code: `await delayPromise(1000) // รอ 1 วินาที
+await delayPromise(2000, () => console.log('Done!'))
+// รอ 2 วินาที แล้วทำงาน callback`,
+            },
+        ],
+    },
+    {
+        category: 'Process Utilities',
+        description: 'ฟังก์ชันสำหรับจัดการ process',
+        functions: [
+            {
+                name: 'runProcess',
+                description: 'ทำงานกับ Array แบบมีลำดับขั้นตอน',
+                code: `const items = [1, 2, 3]
+runProcess(items, (item, index) => {
+  console.log(\`Processing item \${item} at index \${index}\`)
+})
+
+// สามารถกำหนด start index ได้
+runProcess(items, callback, 1) // เริ่มจาก index 1`,
             },
         ],
     },
     {
         category: 'Composition Utilities',
-        description: 'ฟังก์ชันสำหรับการเชื่อมต่อการทำงาน',
+        description: 'ฟังก์ชันสำหรับการ compose function',
         functions: [
             {
-                name: 'ci (Chain/Compose)',
-                description: 'เชื่อมต่อการทำงานของหลายฟังก์ชันเข้าด้วยกัน',
-                code: `// ตัวอย่างการใช้งานพื้นฐาน
-const result1 = ci(
+                name: 'ci',
+                description: 'Chain/compose functions เข้าด้วยกัน',
+                code: `const result = ci(
   5,
   x => x + 1,    // 6
   x => x * 2     // 12
 )
-// result: 12
-
-// ตัวอย่างการใช้งานกับข้อความ
-const result2 = ci(
-  '  HELLO world  ',
-  str => str.trim(),          // "HELLO world"
-  str => str.toLowerCase(),   // "hello world"
-  str => str.replace(' ', '_') // "hello_world"
-)
-// result: "hello_world"`,
+// result: 12`,
             },
             {
                 name: 'withCi',
@@ -330,7 +564,7 @@ const result2 = ci(
 const double = x => x * 2
 
 const compute = withCi(
-  addOne,
+  addOne, 
   double
 )
 
@@ -338,165 +572,11 @@ compute(5) // 12`,
             },
         ],
     },
-    {
-        category: 'Conversion Utilities',
-        description: 'ฟังก์ชันสำหรับแปลงข้อมูลระหว่างรูปแบบต่างๆ',
-        functions: [
-            {
-                name: 'toUid',
-                description: 'สร้าง unique identifier',
-                code: `// สร้าง uid ความยาว 8 ตัวอักษร
-const id = toUid(8)
-// result: "a1b2c3d4"
-
-// สร้าง uid ความยาว 16 ตัวอักษร
-const longId = toUid(16)
-// result: "a1b2c3d4e5f6g7h8"`,
-            },
-            {
-                name: 'toDate',
-                description: 'แปลงข้อมูลเป็น Date object',
-                code: `const date1 = toDate('2024-01-15')
-// result: Date object
-
-const date2 = toDate('15/01/2024', 'DD/MM/YYYY')
-// result: Date object with custom format`,
-            },
-            {
-                name: 'toRegExp',
-                description: 'สร้าง RegExp object จากรูปแบบที่กำหนด',
-                code: `const regex1 = toRegExp('^[0-9]+$')
-// result: /^[0-9]+$/
-
-const regex2 = toRegExp('^[a-z]+$', 'i')
-// result: /^[a-z]+$/i`,
-            },
-            {
-                name: 'toConvertData',
-                description: 'แปลงข้อมูลตามรูปแบบที่กำหนด',
-                code: `const data = {
-  name: 'John',
-  age: '30',
-  active: 'true'
-}
-
-const converted = toConvertData(data, {
-  name: String,
-  age: Number,
-  active: Boolean
-})
-// result: { name: "John", age: 30, active: true }`,
-            },
-        ],
-    },
-    {
-        category: 'Process Management',
-        description: 'ฟังก์ชันสำหรับจัดการกระบวนการทำงาน',
-        functions: [
-            {
-                name: 'runProcess',
-                description: 'จัดการการทำงานแบบลำดับขั้นตอน',
-                code: `const process = runProcess([
-  async (data) => { /* step 1 */ },
-  async (data) => { /* step 2 */ },
-  async (data) => { /* step 3 */ }
-])
-
-const result = await process(initialData)`,
-            },
-            {
-                name: 'mapToKeys',
-                description: 'แปลง array เป็น object โดยใช้ key ที่กำหนด',
-                code: `const users = [
-  { id: 1, name: 'John' },
-  { id: 2, name: 'Jane' }
 ]
 
-const result = mapToKeys(users, 'id')
-// result: { 
-//   "1": { id: 1, name: 'John' },
-//   "2": { id: 2, name: 'Jane' }
-// }`,
-            },
-            {
-                name: 'selectObject',
-                description: 'เลือกเฉพาะ properties ที่ต้องการจาก object',
-                code: `const user = {
-  id: 1,
-  name: 'John',
-  email: 'john@email.com',
-  password: '123456'
-}
-
-const result = selectObject(user, ['id', 'name'])
-// result: { id: 1, name: 'John' }`,
-            },
-            {
-                name: 'checkNestedValue',
-                description: 'ตรวจสอบค่าใน nested object',
-                code: `const data = {
-  user: {
-    profile: {
-      name: 'John'
-    }
-  }
-}
-
-const hasName = checkNestedValue(data, 'user.profile.name')
-// result: true`,
-            },
-        ],
-    },
-    {
-        category: 'Higher-order Functions',
-        description: 'ฟังก์ชันที่รับหรือคืนค่าเป็นฟังก์ชัน',
-        functions: [
-            {
-                name: 'withAddDate/Hour/Month/Minute',
-                description: 'สร้างฟังก์ชันเพิ่ม/ลดวันที่แบบกำหนดค่าล่วงหน้า',
-                code: `// สร้างฟังก์ชันเพิ่มวันที่ 7 วัน
-const addWeek = withAddDate(7)
-const nextWeek = addWeek(new Date())
-
-// สร้างฟังก์ชันเพิ่มเวลา 30 นาที
-const addHalfHour = withAddMinute(30)
-const laterTime = addHalfHour(new Date())`,
-            },
-            {
-                name: 'withCombineText',
-                description: 'สร้างฟังก์ชันรวมข้อความแบบกำหนดตัวคั่นล่วงหน้า',
-                code: `// สร้างฟังก์ชันรวมข้อความด้วย |
-const combineWithPipe = withCombineText('|')
-const result = combineWithPipe(['a', 'b', 'c'])
-// result: "a|b|c"`,
-            },
-            {
-                name: 'withDateDiff',
-                description:
-                    'สร้างฟังก์ชันคำนวณความต่างของเวลาแบบกำหนดรูปแบบล่วงหน้า',
-                code: `const getDiffInDays = withDateDiff('days')
-const days = getDiffInDays(date1, date2)
-// result: number of days between dates`,
-            },
-            {
-                name: 'withCi',
-                description:
-                    'สร้างฟังก์ชัน composition แบบกำหนดลำดับการทำงานล่วงหน้า',
-                code: `const process = withCi(
-  (x: number) => x + 1,
-  (x: number) => x * 2
-)
-
-const result = process(5)  // 12`,
-            },
-        ],
-    },
-]
-
-// Display results with highlighting
+// แสดงผลการค้นหาพร้อม highlight
 const displayResults = computed(() => {
     if (!searchQuery.value.trim()) {
-        // Show all data when no search query
         return utilityExamples.map((category) => ({
             ...category,
             functions: category.functions.map((func) => ({
@@ -536,202 +616,30 @@ const displayResults = computed(() => {
         .filter(Boolean)
 })
 
-// Add search stats
+// สถิติการค้นหา
 const searchStats = computed(() => {
     if (!searchQuery.value.trim()) return null
 
-    const totalFunctions = displayResults.value.reduce(
-        (sum, category) => sum + (category ? category.functions.length : 0),
-        0
-    )
-
     return {
         categories: displayResults.value.length,
-        functions: totalFunctions,
+        functions: displayResults.value.reduce(
+            (sum, category) => sum + (category?.functions.length || 0),
+            0
+        ),
     }
 })
 
-// Installation and basic usage codes
-const installationCode = `npm install adc-directive`
-
-const basicUsageCode = `import { 
-    mapArray,
-    dateDiff,
-    toCurrency,
-    mergeObject,
-    checkObject,
-    validateObject,
-    toCombineText,
-    toHasKey,
-    ci
-} from 'adc-directive'`
-
-const typeSafetyExamples = [
-    {
-        category: 'Type Safety',
-        description: 'แนวทางการใช้ TypeScript type safety อย่างมีประสิทธิภาพ',
-        functions: [
-            {
-                name: 'Generic Types',
-                description:
-                    'การใช้งาน Generic Types เพื่อความยืดหยุ่นและ type safety',
-                code: `// Example with Generic Array Functions
-function processItems<T>(items: ReadonlyArray<T>, callback: (item: T) => void): void {
-  items.forEach(callback)
-}
-
-// Example with Generic Object Functions  
-function getNestedValue<T extends object, K extends keyof T>(obj: T, key: K): T[K] {
-  return obj[key]
-}
-
-// Generic Constraint Example
-function merge<T extends object, U extends object>(obj1: T, obj2: U) {
-  return { ...obj1, ...obj2 }
-}`,
-            },
-            {
-                name: 'Readonly Types',
-                description:
-                    'การป้องกันการแก้ไขข้อมูลโดยไม่ตั้งใจด้วย Readonly types',
-                code: `// Using Readonly type
-function processData(data: Readonly<SomeType>): ResultType {
-  // data cannot be modified here
-  return transformedData
-}
-
-// Readonly array
-const numbers: ReadonlyArray<number> = [1, 2, 3]
-// numbers.push(4) // Error!
-
-// Readonly properties
-interface Config {
-  readonly apiKey: string
-  readonly endpoint: string
-}`,
-            },
-            {
-                name: 'Type Guards',
-                description: 'การตรวจสอบประเภทข้อมูลที่ runtime',
-                code: `// Custom type guard
-function isUser(obj: any): obj is User {
-  return 'id' in obj && 'name' in obj
-}
-
-// Using type guard
-function processUser(input: unknown) {
-  if (isUser(input)) {
-    // TypeScript knows input is User here
-    console.log(input.name)
-  }
-}
-
-// Tagged unions
-type Result<T> = 
-  | { success: true; data: T }
-  | { success: false; error: string }`,
-            },
-        ],
-    },
-    {
-        category: 'Best Practices',
-        description: 'แนวทางการใช้งานที่แนะนำและข้อควรระวัง',
-        functions: [
-            {
-                name: 'Type Safety Best Practices',
-                description: 'แนวทางการใช้ TypeScript ให้มีประสิทธิภาพ',
-                code: `// DO: Use strict type checking
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true
-  }
-}
-
-// DON'T: Avoid using 'any'
-// Bad
-function process(data: any) { ... }
-
-// Good
-function process<T>(data: T) { ... }
-
-// DO: Use type inference when possible
-// Let TypeScript infer the types
-const numbers = [1, 2, 3] // Type: number[]
-const user = { name: 'John', age: 30 } // Type: { name: string, age: number }`,
-            },
-            {
-                name: 'Performance Considerations',
-                description: 'แนวทางการเขียนโค้ดให้มีประสิทธิภาพ',
-                code: `// DO: Avoid unnecessary object creation
-// Bad
-items.map(x => ({ ...x, modified: true }))
-
-// Good
-items.map(x => Object.assign({}, x, { modified: true }))
-
-// DON'T: Avoid excessive type casting
-// Bad
-(obj as any).someProperty
-
-// Good
-if (isValidObject(obj)) {
-  obj.someProperty
-}
-
-// DO: Use appropriate data structures
-// Bad: Searching in array
-const found = array.find(x => x.id === searchId)
-
-// Good: Using Map for lookups
-const map = new Map(array.map(x => [x.id, x]))
-const found = map.get(searchId)`,
-            },
-            {
-                name: 'Code Organization',
-                description: 'แนวทางการจัดการโค้ดให้เป็นระเบียบ',
-                code: `// DO: Group related functionality
-// types.ts
-interface User { ... }
-type UserRole = 'admin' | 'user'
-
-// utils.ts
-export const formatUser = (user: User) => { ... }
-export const validateUser = (user: User) => { ... }
-
-// DO: Use barrel exports
-// index.ts
-export * from './types'
-export * from './utils'
-export * from './constants'
-
-// DON'T: Mix business logic with utilities
-// Bad
-function utilityFunction() {
-  // Business logic here
-  // Utility code here
-}
-
-// Good
-// business-logic.ts
-function processBusiness() { ... }
-// utils.ts
-function utilityFunction() { ... }`,
-            },
-        ],
-    },
-]
+// Copy code to clipboard
 const copyCode = async (code: string) => {
     try {
         await navigator.clipboard.writeText(code)
-        // Could add toast notification here
+        // อาจเพิ่ม notification ตรงนี้
     } catch (err) {
         console.error('Failed to copy:', err)
     }
 }
 
-// Scroll to section on mount and route hash change
+// Scroll to section
 const scrollToSection = () => {
     if (route.hash) {
         const element = document.querySelector(route.hash)
@@ -739,6 +647,10 @@ const scrollToSection = () => {
             element.scrollIntoView({ behavior: 'smooth' })
         }
     }
+}
+const handlerResetExample = () => {
+    selectedExample.value = 'toCombineText'
+    handleExampleChange('toCombineText')
 }
 
 onMounted(() => {
@@ -749,12 +661,19 @@ watch(
     () => route.hash,
     () => scrollToSection()
 )
+
+// Handle example change in playground
+const handleExampleChange = (example: string) => {
+    console.log('Example:', example)
+    codeInput.value = examples[example as ExampleKey].template
+    codeInput.value = examples[example as ExampleKey].template
+}
 </script>
 
 <template>
     <BcLayout
         title="ADC Directive"
-        subtitle="Utility functions สำหรับ TypeScript/JavaScript โดยเฉพาะสำหรับ Vue.js applications"
+        subtitle="Utility functions สำหรับ TypeScript/JavaScript"
         icon="Code"
     >
         <!-- Search Section -->
@@ -771,17 +690,16 @@ watch(
 
             <div class="flex flex-col gap-4">
                 <BcInput
-                    id="search-functions"
+                    id="searchQuery"
                     :data-value="searchQuery"
-                    @input="(value) => (searchQuery = value || '')"
+                    @input="(v) => (searchQuery = v as string)"
                     placeholder="พิมพ์คำค้นหา..."
                     icon="Search"
                 />
 
-                <!-- Search Results Stats -->
                 <div
                     v-if="searchQuery.trim() && searchStats"
-                    class="text-sm text-slate-600 animate-fade-in"
+                    class="text-sm text-slate-600"
                 >
                     พบ {{ searchStats.functions }} ฟังก์ชัน ใน
                     {{ searchStats.categories }} หมวดหมู่
@@ -789,52 +707,62 @@ watch(
             </div>
         </section>
 
-        <!-- Installation -->
+        <!-- Interactive Playground -->
         <section
-            v-if="!searchQuery.trim() && !searchStats"
-            id="installation"
+            v-if="!searchQuery.trim()"
             class="bg-white rounded-xl shadow-lg p-6 mb-8"
         >
             <div class="flex items-center gap-3 mb-6">
-                <BcIcon name="Package" size="24" color="primary" />
-                <h2 class="text-xl font-bold">การติดตั้ง</h2>
+                <BcIcon name="Palette" size="24" color="primary" />
+                <div>
+                    <h2 class="text-xl font-bold">Interactive Playground</h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        ทดลองใช้งานฟังก์ชันต่างๆ
+                    </p>
+                </div>
             </div>
 
-            <div class="relative bg-slate-800 rounded-lg p-4">
-                <BcButton
-                    @click="() => copyCode(installationCode)"
-                    variant="white"
-                    icon="Copy"
-                    class="!absolute top-3 right-3"
-                    size="sm"
-                />
-                <pre
-                    class="text-sm text-slate-200"
-                ><code>{{ installationCode }}</code></pre>
-            </div>
-        </section>
-        <!-- Basic Usage -->
-        <section
-            v-if="!searchQuery.trim() && !searchStats"
-            id="basic-usage"
-            class="bg-white rounded-xl shadow-lg p-6 mb-8"
-        >
-            <div class="flex items-center gap-3 mb-6">
-                <BcIcon name="FileCode" size="24" color="primary" />
-                <h2 class="text-xl font-bold">การใช้งานพื้นฐาน</h2>
-            </div>
+            <div class="grid gap-4">
+                <div class="flex gap-4">
+                    <select
+                        v-model="selectedExample"
+                        class="px-4 py-2 border rounded"
+                        @change="handleExampleChange(selectedExample)"
+                    >
+                        <option
+                            v-for="(ex, key) in examples"
+                            :key="ex.template"
+                            :value="key"
+                        >
+                            {{ key }}
+                        </option>
+                    </select>
+                    <BcButton
+                        variant="primary"
+                        icon="RefreshCw"
+                        @click="handlerResetExample"
+                    >
+                        ล้างข้อมูล
+                    </BcButton>
+                </div>
 
-            <div class="relative bg-slate-800 rounded-lg p-4">
-                <BcButton
-                    @click="() => copyCode(basicUsageCode)"
-                    variant="white"
-                    icon="Copy"
-                    class="!absolute top-3 right-3"
-                    size="sm"
-                />
-                <pre
-                    class="text-sm text-slate-200"
-                ><code>{{ basicUsageCode }}</code></pre>
+                <div class="grid bg-slate-800 rounded-lg p-4">
+                    <BcButton
+                        @click="copyCode(codeInput)"
+                        variant="white"
+                        icon="Copy"
+                        class="ml-auto"
+                        size="sm"
+                    />
+                    <textarea
+                        v-model="codeInput"
+                        class="w-full h-40 p-4 font-mono text-sm bg-transparent text-white focus:outline-none"
+                    />
+                </div>
+
+                <div class="text-sm text-slate-600">
+                    <p>{{ examples[selectedExample].description }}</p>
+                </div>
             </div>
         </section>
 
@@ -844,8 +772,7 @@ watch(
                 :id="category?.category?.toLowerCase().replace(/ /g, '-')"
                 class="mb-8"
             >
-                <!-- Category header -->
-                <div class="flex items-center gap-3 mb-6 pt-4">
+                <div class="flex items-center gap-3 mb-6">
                     <BcIcon name="Code" size="24" color="primary" />
                     <div>
                         <h2 class="text-xl font-bold">
@@ -857,263 +784,39 @@ watch(
                     </div>
                 </div>
 
-                <!-- Functions -->
                 <div class="space-y-6">
                     <div
                         v-for="func in category?.functions"
                         :key="func.name"
-                        :id="func.name.toLowerCase().replace(/[^a-z0-9]/g, '-')"
                         class="bg-white rounded-xl shadow-lg p-6"
                     >
                         <h3
                             class="text-lg font-bold mb-2"
                             v-html="func.highlightedName"
-                        ></h3>
+                        />
                         <p
                             class="text-slate-600 mb-4"
                             v-html="func.highlightedDescription"
-                        ></p>
-                        <div class="relative bg-slate-800 rounded-lg p-4">
+                        />
+                        <div class="grid bg-slate-800 rounded-lg p-4">
                             <BcButton
-                                @click="() => copyCode(func.code)"
+                                @click="copyCode(func.code)"
                                 variant="white"
                                 icon="Copy"
-                                class="!absolute top-3 right-3"
+                                class="ml-auto"
                                 size="sm"
                             />
-                            <pre
-                                class="text-sm text-slate-200"
-                            ><code v-html="func.highlightedCode"></code></pre>
+                            <pre><code v-html="func.highlightedCode" /></pre>
                         </div>
                     </div>
                 </div>
             </section>
         </template>
-        <template v-if="!displayResults.length">
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-                <p class="text-lg text-slate-600">ไม่พบข้อมูลที่ค้นหา</p>
-            </div>
-        </template>
 
-        <!-- Type Safety -->
-        <section
-            id="type-safety"
-            class="bg-white rounded-xl shadow-lg p-6 mb-8 mt-8"
-        >
-            <div
-                class="grid items-center gap-3 mb-6"
-                v-for="(data, index) in typeSafetyExamples"
-                :key="index"
-            >
-                <BcIcon name="Shield" size="24" color="primary" />
-                <div>
-                    <h2 class="text-xl font-bold">{{ data.category }}</h2>
-                    <p class="text-sm text-slate-600 mt-1">
-                        {{ data.description }}
-                    </p>
-                </div>
-                <div class="grid gap-6" v-for="d in data.functions">
-                    <div class="bg-slate-50 p-6 rounded-lg grid gap-2">
-                        <h3 class="font-bold text-lg">
-                            {{ d.name }}
-                        </h3>
-                        <p>{{ d.description }}</p>
-                        <div class="relative bg-slate-800 rounded-lg p-4">
-                            <BcButton
-                                @click="() => copyCode(d.code)"
-                                variant="white"
-                                icon="Copy"
-                                class="!absolute top-3 right-3"
-                                size="sm"
-                            />
-                            <pre
-                                class="text-sm text-slate-200"
-                            ><code>{{ d.code }}</code></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- suggestions-feedback -->
-        <section
-            id="suggestions-feedback"
-            class="bg-white rounded-xl shadow-lg p-6 mb-8"
-        >
-            <div class="flex items-center gap-3 mb-6">
-                <BcIcon name="Lightbulb" size="24" color="primary" />
-                <h2 class="text-xl font-bold">แนวทางการใช้งานที่แนะนำ</h2>
-            </div>
-
-            <!-- Do's and Don'ts Grid -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Do's -->
-                <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-                    <h3 class="font-bold text-green-800 mb-4">
-                        ควรปฏิบัติ (Do's)
-                    </h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="Check"
-                                size="20"
-                                class="text-green-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-green-800">
-                                    ใช้ TypeScript Type-Safety
-                                </p>
-                                <p class="text-sm text-green-700 mt-1">
-                                    เปิดใช้ strict mode และกำหนด type ให้ชัดเจน
-                                </p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="Check"
-                                size="20"
-                                class="text-green-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-green-800">
-                                    ใช้ Function Composition
-                                </p>
-                                <p class="text-sm text-green-700 mt-1">
-                                    แยกโค้ดเป็นฟังก์ชันย่อยๆ ที่ทำงานเฉพาะอย่าง
-                                </p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="Check"
-                                size="20"
-                                class="text-green-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-green-800">
-                                    ใช้ Immutable Data
-                                </p>
-                                <p class="text-sm text-green-700 mt-1">
-                                    หลีกเลี่ยงการแก้ไขข้อมูล input โดยตรง
-                                </p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Don'ts -->
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-                    <h3 class="font-bold text-red-800 mb-4">
-                        ไม่ควรปฏิบัติ (Don'ts)
-                    </h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="X"
-                                size="20"
-                                class="text-red-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-red-800">
-                                    หลีกเลี่ยง any type
-                                </p>
-                                <p class="text-sm text-red-700 mt-1">
-                                    ใช้ proper typing แทนการใช้ any
-                                </p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="X"
-                                size="20"
-                                class="text-red-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-red-800">
-                                    ไม่ Mutate ข้อมูล Input
-                                </p>
-                                <p class="text-sm text-red-700 mt-1">
-                                    สร้าง copy ของข้อมูลก่อนแก้ไขเสมอ
-                                </p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <BcIcon
-                                name="X"
-                                size="20"
-                                class="text-red-600 flex-shrink-0 mt-1"
-                            />
-                            <div>
-                                <p class="font-medium text-red-800">
-                                    ไม่ซ้อนฟังก์ชันมากเกินไป
-                                </p>
-                                <p class="text-sm text-red-700 mt-1">
-                                    แยกโค้ดเป็นฟังก์ชันที่มีความซับซ้อนพอเหมาะ
-                                </p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Additional Tips -->
-            <div class="mt-6 bg-blue-50 p-6 rounded-lg border border-blue-200">
-                <h3 class="font-bold text-blue-800 mb-4">เคล็ดลับเพิ่มเติม</h3>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="font-medium text-blue-800 mb-2">
-                            Performance Tips
-                        </h4>
-                        <ul class="space-y-2 text-sm text-blue-700">
-                            <li class="flex items-center gap-2">
-                                <BcIcon
-                                    name="Zap"
-                                    size="16"
-                                    class="text-blue-600"
-                                />
-                                ใช้ cached results สำหรับการคำนวณที่ซับซ้อน
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <BcIcon
-                                    name="Zap"
-                                    size="16"
-                                    class="text-blue-600"
-                                />
-                                หลีกเลี่ยงการ loop ซ้อน loop
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-medium text-blue-800 mb-2">
-                            Debugging Tips
-                        </h4>
-                        <ul class="space-y-2 text-sm text-blue-700">
-                            <li class="flex items-center gap-2">
-                                <BcIcon
-                                    name="Bug"
-                                    size="16"
-                                    class="text-blue-600"
-                                />
-                                ใช้ TypeScript strict mode
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <BcIcon
-                                    name="Bug"
-                                    size="16"
-                                    class="text-blue-600"
-                                />
-                                เขียน unit tests ให้ครอบคลุม
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Show message when no results found -->
+        <!-- No Results -->
         <div
-            v-if="searchQuery.trim() && displayResults.length === 0"
-            class="bg-slate-50 rounded-xl p-8 text-center"
+            v-if="searchQuery.trim() && !displayResults.length"
+            class="bg-white rounded-xl shadow-lg p-8 text-center"
         >
             <BcIcon
                 name="Search"
@@ -1129,63 +832,76 @@ watch(
 </template>
 
 <style scoped>
+/* Existing styles ... */
+
+/* Code block styling */
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
+    font-family: ui-monospace, monospace;
+    background-color: rgb(30 41 59); /* slate-800 */
+    color: #e2e8f0; /* slate-200 */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 0;
 }
 
 code {
-    font-family: ui-monospace, monospace;
+    font-family: inherit;
+    color: #fff;
 }
 
+/* Style for inline code */
+:deep(code:not(pre code)) {
+    background-color: rgb(241 245 249); /* slate-100 */
+    color: rgb(71 85 105); /* slate-600 */
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Syntax highlighting colors */
+:deep(.string) {
+    color: #a5d6ff;
+}
+:deep(.number) {
+    color: #ff9580;
+}
+:deep(.boolean) {
+    color: #ffb1bb;
+}
+:deep(.comment) {
+    color: #8b949e;
+    font-style: italic;
+}
+:deep(.keyword) {
+    color: #ff7b72;
+}
+:deep(.function) {
+    color: #d2a8ff;
+}
+:deep(.operator) {
+    color: #79c0ff;
+}
+
+/* Make copy button more visible */
 .bg-slate-800 :deep(.bg-white) {
-    --tw-bg-opacity: 0.9;
-    background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.bg-slate-800 :deep(.bg-white:hover) {
     --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+    color: rgb(30 41 59); /* slate-800 */
 }
 
+/* Improve button hover state */
+.bg-slate-800 :deep(.bg-white:hover) {
+    --tw-bg-opacity: 0.9;
+}
+
+/* Section scroll margin */
 section {
     scroll-margin-top: 6rem;
 }
 
-/* Smooth scroll behavior */
-:deep(html) {
-    scroll-behavior: smooth;
-}
-
-/* Highlight active section */
-section:target {
-    animation: highlight 1s ease-out;
-}
-
-@keyframes highlight {
-    0% {
-        background-color: rgba(var(--primary), 0.1);
-    }
-    100% {
-        background-color: transparent;
-    }
-}
-
-/* Add animation for search results */
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* Search highlight styling */
 :deep(mark) {
     background-color: rgb(254 243 199);
     padding: 0 0.25rem;
@@ -1193,9 +909,19 @@ section:target {
     font-weight: 500;
 }
 
-/* For highlighted code */
+/* Search highlight in code blocks */
 pre :deep(mark) {
     background-color: rgba(254, 243, 199, 0.2);
     color: inherit;
+}
+
+/* Interactive playground textarea */
+textarea.code-input {
+    background-color: rgb(30 41 59);
+    color: #e2e8f0;
+    width: 100%;
+    font-family: ui-monospace, monospace;
+    resize: vertical;
+    min-height: 150px;
 }
 </style>
