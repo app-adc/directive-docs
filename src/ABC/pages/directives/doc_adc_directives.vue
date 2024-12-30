@@ -436,8 +436,8 @@ const result = await delayPromise(1000, (x) => x * 2, 5)
     copyDeep: {
         template: `import { copyDeep } from 'adc-directive'
 
-const obj = { 
-  a: 1, 
+const obj = {
+  a: 1,
   b: { c: 2 },
   d: [1, 2, { e: 3 }]
 }
@@ -634,293 +634,724 @@ const highlightText = (text: string): string => {
 // รายละเอียดทั้งหมดของ utilities แยกตามหมวดหมู่
 const utilityExamples = [
     {
-        category: 'Array Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ Array',
+        category: 'HTTP Utilities',
+        description: 'ฟังก์ชันสำหรับจัดการ HTTP Requests',
+        functions: [
+            {
+                name: 'ADC',
+                description:
+                    'Client สำหรับจัดการ HTTP requests พร้อมระบบ caching อัตโนมัติ',
+                code: `const api = new ADC<RequestType, ResponseType>()
+
+// Basic request
+const response = await api.request({
+  baseURL: 'https://api.example.com',
+  method: 'POST',
+  variables: { id: 1 }
+})
+
+// Request with caching
+const cachedResponse = await api.request({
+  baseURL: 'https://api.example.com',
+  method: 'GET',
+  storage: 'cache',
+  timeToLive: 60000, // 1 minute
+  variables: { id: 1 }
+})
+
+// GraphQL request
+const graphqlResponse = await api.request({
+  baseURL: 'https://api.example.com/graphql',
+  query: \`
+    query GetUser($id: ID!) {
+      user(id: $id) {
+        name
+        email
+      }
+    }
+  \`,
+  variables: { id: 1 }
+})`,
+            },
+        ],
+    },
+
+    {
+        category: 'Array Functions',
+        description: 'ฟังก์ชันสำหรับจัดการข้อมูลแบบ Array',
         functions: [
             {
                 name: 'mapArray',
                 description:
-                    'แปลง Array ทุกตัวให้อยู่ในระดับเดียวกัน (Flatten)',
+                    'แปลง Array ทุกตัวให้อยู่ในระดับเดียวกัน (Flatten Nested Arrays)',
                 code: `const nestedArray = [1, [2, 3, [4, 5, [6]]]]
-const result = mapArray(nestedArray)
-// result: [1, 2, 3, 4, 5, 6]`,
+const flatArray = mapArray(nestedArray)
+// Result: [1, 2, 3, 4, 5, 6]`,
             },
             {
                 name: 'chunkArray',
                 description: 'แบ่ง Array เป็นชุดตามจำนวนที่กำหนด',
                 code: `const items = [1, 2, 3, 4, 5]
-const result = chunkArray(items, 2)
-// result: [[1, 2], [3, 4], [5]]`,
+const chunked = chunkArray(items, 2)
+// Result: [[1,2], [3,4], [5]]`,
             },
             {
                 name: 'toChangePositionArray',
                 description: 'สลับตำแหน่งข้อมูลใน Array แบบสุ่ม',
-                code: `const arr = ['A', 'B', 'C']
-const result = toChangePositionArray(arr)
-// อาจได้ผลลัพธ์เช่น ['B', 'C', 'A']`,
+                code: `const array = ['A', 'B', 'C', 'D']
+const shuffled = toChangePositionArray(array)
+// Result: ['C', 'A', 'D', 'B'] (ตำแหน่งจะสุ่มทุกครั้ง)`,
+            },
+            {
+                name: 'checkItemDuplicate',
+                description:
+                    'ตรวจสอบค่าซ้ำใน Array โดยระบุ key ที่ต้องการตรวจสอบ',
+                code: `const users = [
+  { id: 1, name: 'John' },
+  { id: 2, name: 'John' },
+  { id: 3, name: 'Jane' }
+]
+
+// ตรวจสอบโดยใช้ชื่อ
+const hasDuplicateName = checkItemDuplicate(users, user => user.name)
+// Result: true
+
+// ตรวจสอบโดยใช้ ID
+const hasDuplicateId = checkItemDuplicate(users, user => user.id)
+// Result: false`,
             },
         ],
     },
+
     {
-        category: 'String Utilities',
+        category: 'Object Functions',
+        description: 'ฟังก์ชันสำหรับจัดการข้อมูลแบบ Object',
+        functions: [
+            {
+                name: 'mergeObject',
+                description: 'รวม Object หลายตัวเข้าด้วยกันแบบ Deep Merge',
+                code: `const obj1 = {
+  a: 1,
+  b: { c: 2 }
+}
+const obj2 = {
+  b: { d: 3 },
+  e: 4
+}
+const merged = mergeObject(obj1, obj2)
+/* Result: {
+  a: 1,
+  b: { c: 2, d: 3 },
+  e: 4
+} */`,
+            },
+            {
+                name: 'findObjectByKey',
+                description: 'ค้นหา Key ใน Object แบบ Nested Path',
+                code: `const data = {
+  user: {
+    profile: {
+      name: 'John',
+      settings: {
+        theme: 'dark'
+      }
+    }
+  }
+}
+
+const hasName = findObjectByKey(data, ['user.profile.name'])
+// Result: true
+
+const hasAge = findObjectByKey(data, ['user.profile.age'])
+// Result: false`,
+            },
+            {
+                name: 'selectObject',
+                description: 'เลือกเฉพาะ Keys ที่ต้องการจาก Object',
+                code: `const data = {
+  id: 1,
+  name: 'John',
+  age: 30,
+  email: 'john@example.com'
+}
+
+const selected = selectObject(data, ['id', 'name'])
+// Result: { id: 1, name: 'John' }`,
+            },
+            {
+                name: 'createObj',
+                description: 'สร้าง Object จาก Path String',
+                code: `const base = {
+  user: {
+    profile: {
+      name: 'John'
+    }
+  }
+}
+
+const newObj = createObj(base, 'user.profile')
+/* Result: {
+  user: {
+    profile: {
+      name: 'John'
+    }
+  }
+} */`,
+            },
+            {
+                name: 'mapToKeys',
+                description: 'แปลง Path String เป็น Array ของ Keys',
+                code: `const result = mapToKeys('profile.name.colors[2].length')
+// Result: ['profile', 'name', 'colors', '2', 'length']`,
+            },
+            {
+                name: 'checkNestedValue',
+                description: 'ตรวจสอบค่าใน Nested Object',
+                code: `const data = {
+  user: {
+    profile: {
+      name: 'John',
+      hobbies: ['reading', 'gaming']
+    }
+  }
+}
+
+const result = checkNestedValue(data, {
+  'user.profile.name': 'John',
+  'user.profile.hobbies': ['reading', 'gaming']
+})
+// Result: true`,
+            },
+        ],
+    },
+
+    {
+        category: 'Validation Functions',
+        description: 'ฟังก์ชันสำหรับตรวจสอบความถูกต้องของข้อมูล',
+        functions: [
+            {
+                name: 'validateObject',
+                description: 'ตรวจสอบความถูกต้องของ Keys ใน Object',
+                code: `const data = {
+  id: 1,
+  user: {
+    name: 'John',
+    email: 'john@example.com'
+  }
+}
+
+const result = validateObject(
+  data,
+  ['id', 'user.name', 'user.email'],
+  'User Data'
+)
+/* Result: {
+  status: 1,  // 1 = ผ่าน, 0 = ไม่ผ่าน, -1 = error
+  message: '' // ข้อความ error (ถ้ามี)
+} */`,
+            },
+            {
+                name: 'validateEmail',
+                description:
+                    'ตรวจสอบความถูกต้องของอีเมล พร้อมตัวเลือกเพิ่มเติม',
+                code: `const result = validateEmail('test@example.com', {
+  allowEmpty: false,
+  maxLength: 100,
+  allowedDomains: ['example.com'],
+  blockDisposable: true
+})
+/* Result: {
+  isValid: true,
+  message: ''  // ข้อความ error (ถ้ามี)
+} */`,
+            },
+            {
+                name: 'validatePayloadEmptyToNull',
+                description: 'แปลงค่าว่างทั้งหมดใน Object เป็น null',
+                code: `const data = {
+  name: '',
+  age: 0,
+  items: [],
+  address: {
+    street: '',
+    city: 'Bangkok'
+  }
+}
+
+const result = validatePayloadEmptyToNull(data)
+/* Result: {
+  name: null,
+  age: 0,
+  items: null,
+  address: {
+    street: null,
+    city: 'Bangkok'
+  }
+} */`,
+            },
+            {
+                name: 'checkEmail',
+                description: 'ตรวจสอบรูปแบบอีเมลอย่างง่าย',
+                code: `checkEmail('test@example.com')  // true
+checkEmail('invalid-email')    // false`,
+            },
+            {
+                name: 'checkEmpty',
+                description: 'ตรวจสอบค่าว่างสำหรับทุกประเภทข้อมูล',
+                code: `// String
+checkEmpty('')         // true
+checkEmpty('text')     // false
+
+// Array
+checkEmpty([])         // true
+checkEmpty([1, 2])     // false
+
+// Object
+checkEmpty({})         // true
+checkEmpty({ a: 1 })   // false
+
+// Others
+checkEmpty(null)       // true
+checkEmpty(undefined)  // true
+checkEmpty(0)         // false`,
+            },
+            {
+                name: 'checkFormatDate',
+                description: 'ตรวจสอบรูปแบบวันที่',
+                code: `checkFormatDate('2024-01-01', 'YYYY-MM-DD')     // true
+checkFormatDate('01/01/2024', 'DD/MM/YYYY')   // true
+checkFormatDate('2024-13-01', 'YYYY-MM-DD')   // false`,
+            },
+        ],
+    },
+
+    {
+        category: 'Date Functions',
+        description: 'ฟังก์ชันสำหรับจัดการวันที่และเวลา',
+        functions: [
+            {
+                name: 'dateDiff',
+                description: 'คำนวณความต่างระหว่างวันที่',
+                code: `const diff = dateDiff(
+  new Date('2024-01-01'),
+  new Date('2024-01-15')
+)
+/* Result: {
+  days: 14,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  milliseconds: 1209600000,
+  hoursTotal: 336,
+  minutesTotal: 20160,
+  secondsTotal: 1209600
+} */`,
+            },
+            {
+                name: 'dateDiffToString',
+                description: 'แสดงความต่างของวันที่ในรูปแบบข้อความ',
+                code: `const diff1 = dateDiffToString(
+  new Date('2024-01-01'),
+  new Date('2024-02-01'),
+  'th'  // 'th' | 'en'
+)
+// Result: '1 เดือนที่แล้ว'
+
+const diff2 = dateDiffToString(
+  new Date('2024-01-01'),
+  new Date('2024-01-15'),
+  'en'
+)
+// Result: '14 days ago'`,
+            },
+            {
+                name: 'dateToCombine',
+                description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
+                code: `const result = dateToCombine(new Date('2024-01-01'))
+/* Result: {
+  year: '2024',
+  month: '01',
+  day: '01',
+  hour: '00',
+  minute: '00',
+  second: '00',
+  valueOfDate: '2024-01-01',
+  valueOfTime: '00:00:00',
+  valueOfValue: '2024-01-01 00:00:00',
+  th: 'วันจันทร์ที่ 1 มกราคม 2567'
+} */`,
+            },
+            {
+                name: 'addDate',
+                description: 'เพิ่มหรือลดจำนวนวัน',
+                code: `const date = new Date('2024-01-01')
+
+// เพิ่ม 7 วัน
+const future = addDate(date, 7)
+// Result: 2024-01-08
+
+// ลด 3 วัน
+const past = addDate(date, -3)
+// Result: 2023-12-29`,
+            },
+            {
+                name: 'addMonth',
+                description: 'เพิ่มหรือลดจำนวนเดือน',
+                code: `const date = new Date('2024-01-01')
+
+// เพิ่ม 3 เดือน
+const future = addMonth(date, 3)
+// Result: 2024-04-01
+
+// ลด 1 เดือน
+const past = addMonth(date, -1)
+// Result: 2023-12-01`,
+            },
+            {
+                name: 'addHour',
+                description: 'เพิ่มหรือลดจำนวนชั่วโมง',
+                code: `const date = new Date('2024-01-01 10:00')
+
+// เพิ่ม 5 ชั่วโมง
+const future = addHour(date, 5)
+// Result: 2024-01-01 15:00
+
+// ลด 2 ชั่วโมง
+const past = addHour(date, -2)
+// Result: 2024-01-01 08:00`,
+            },
+            {
+                name: 'addMinute',
+                description: 'เพิ่มหรือลดจำนวนนาที',
+                code: `const date = new Date('2024-01-01 10:00')
+
+// เพิ่ม 30 นาที
+const future = addMinute(date, 30)
+// Result: 2024-01-01 10:30
+
+// ลด 15 นาที
+const past = addMinute(date, -15)
+// Result: 2024-01-01 09:45`,
+            },
+        ],
+    },
+
+    {
+        category: 'String Functions',
         description: 'ฟังก์ชันสำหรับจัดการข้อความ',
         functions: [
             {
                 name: 'toCombineText',
-                description: 'รวม Array ของข้อความด้วยตัวคั่นที่กำหนด',
-                code: `const parts = ['a', 'b', null, 'c']
-const result = toCombineText(parts, '_')
-// result: 'a_b_c'`,
+                description: 'รวม Array เป็น String ด้วยตัวคั่นที่กำหนด',
+                code: `const items = ['Hello', null, 'World', '', '!']
+
+const result1 = toCombineText(items)
+// Result: 'Hello World !'
+
+const result2 = toCombineText(items, '-')
+// Result: 'Hello-World-!'`,
             },
             {
                 name: 'toHasKey',
-                description: 'ลบอักขระพิเศษและช่องว่าง เหมาะสำหรับใช้เป็น key',
-                code: `const text = '19-55 77_88*99 aBC'
-const result = toHasKey(text)
-// result: '195577_8899abc'`,
+                description: 'ทำความสะอาดข้อความให้เหมาะสำหรับใช้เป็น Key',
+                code: `const text = '  User-Name__123 !@#  '
+const key = toHasKey(text)
+// Result: 'username_123'`,
+            },
+            {
+                name: 'toRegExp',
+                description: 'สร้าง RegExp จาก patterns ที่กำหนด',
+                code: `const pattern = toRegExp(['th', 'en', 'number'], 'g')
+// สร้าง RegExp ที่รองรับภาษาไทย, อังกฤษ และตัวเลข
+
+// ใช้งานร่วมกับ toReplaceTextByRegExp
+const text = 'สวัสดี Hello 123'
+const result = text.match(pattern)
+// Result: ['สวัสดี', 'Hello', '123']`,
             },
             {
                 name: 'toReplaceTextByRegExp',
                 description: 'แทนที่ข้อความด้วย RegExp pattern',
                 code: `const text = 'Hello123World!'
 const result = toReplaceTextByRegExp(text, ['en', 'number'])
-// เก็บเฉพาะตัวอักษรภาษาอังกฤษและตัวเลข`,
+// Result: 'Hello123World'
+
+// ใช้แค่ตัวอักษรภาษาอังกฤษ
+const onlyEn = toReplaceTextByRegExp(text, ['en'])
+// Result: 'HelloWorld'`,
             },
         ],
     },
+
     {
-        category: 'Date Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการวันที่และเวลา',
-        functions: [
-            {
-                name: 'dateDiff',
-                description: 'คำนวณความต่างของเวลาระหว่างสองวันที่',
-                code: `const diff = dateDiff(date1, date2)
-// returns: {
-//   days: number,
-//   hours: number,
-//   minutes: number,
-//   seconds: number,
-//   milliseconds: number
-// }`,
-            },
-            {
-                name: 'addDate',
-                description: 'เพิ่มหรือลดจำนวนวัน',
-                code: `const date = new Date('2024-01-01')
-const result = addDate(date, 7)
-// เพิ่ม 7 วัน`,
-            },
-            {
-                name: 'addMonth',
-                description: 'เพิ่มหรือลดจำนวนเดือน',
-                code: `const date = new Date('2024-01-01')
-const result = addMonth(date, 3)
-// เพิ่ม 3 เดือน`,
-            },
-            {
-                name: 'addHour',
-                description: 'เพิ่มหรือลดจำนวนชั่วโมง',
-                code: `const date = new Date('2024-01-01 10:00')
-const result = addHour(date, 5)
-// เพิ่ม 5 ชั่วโมง`,
-            },
-            {
-                name: 'addMinute',
-                description: 'เพิ่มหรือลดจำนวนนาที',
-                code: `const date = new Date('2024-01-01 10:00')
-const result = addMinute(date, 30)
-// เพิ่ม 30 นาที`,
-            },
-            {
-                name: 'dateToCombine',
-                description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
-                code: `const date = new Date()
-const result = dateToCombine(date)
-// returns: {
-//   valueOfDate: 'YYYY-MM-DD',
-//   valueOfTime: 'HH:mm:ss',
-//   valueOfValue: 'YYYY-MM-DD HH:mm:ss',
-//   th: 'วันที่ภาษาไทย'
-// }`,
-            },
-        ],
-    },
-    {
-        category: 'Object Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ Object',
-        functions: [
-            {
-                name: 'mergeObject',
-                description: 'รวม object หลายตัวเข้าด้วยกันแบบ deep merge',
-                code: `const obj1 = { a: 1, b: { c: 2 } }
-const obj2 = { b: { d: 3 }, e: 4 }
-const result = mergeObject(obj1, obj2)
-// result: { a: 1, b: { c: 2, d: 3 }, e: 4 }`,
-            },
-            {
-                name: 'findObjectByKey',
-                description: 'ค้นหา key ใน object แบบ nested',
-                code: `const obj = { user: { profile: { name: 'John' } } }
-const exists = findObjectByKey(obj, ['user.profile.name'])
-// result: true`,
-            },
-            {
-                name: 'selectObject',
-                description: 'เลือกเฉพาะบาง keys จาก object',
-                code: `const obj = { id: 1, name: 'John', age: 30 }
-const result = selectObject(obj, ['id', 'name'])
-// result: { id: 1, name: 'John' }`,
-            },
-            {
-                name: 'checkNestedValue',
-                description: 'ตรวจสอบค่าใน nested object',
-                code: `const obj = {
-  colors: ['red', 'blue'],
-  user: { name: 'John' }
-}
-const result = checkNestedValue(obj, {
-  colors: ['red', 'blue'],
-  'user.name': 'John'
-})
-// result: true`,
-            },
-        ],
-    },
-    {
-        category: 'Number Utilities',
+        category: 'Number Functions',
         description: 'ฟังก์ชันสำหรับจัดการตัวเลข',
         functions: [
             {
                 name: 'toNumber',
                 description: 'แปลงค่าเป็นตัวเลข',
-                code: `toNumber('123') // 123
-toNumber('abc') // 0
-toNumber(null) // 0`,
+                code: `toNumber('123')      // 123
+toNumber('-12.34')   // -12.34
+toNumber('abc')      // 0
+toNumber(null)       // 0
+toNumber(undefined)  // 0
+toNumber(true)       // 0`,
             },
             {
                 name: 'toCurrency',
                 description: 'จัดรูปแบบตัวเลขให้อยู่ในรูปแบบเงิน',
-                code: `const num = 1234567.89
-const result = toCurrency(num, 2)
-// result: '1,234,567.89'`,
+                code: `// จัดรูปแบบเป็นตัวเลขทศนิยม 2 ตำแหน่ง
+toCurrency(1234567.89, 2)     // '1,234,567.89'
+toCurrency(1234.56, 2)        // '1,234.56'
+toCurrency(1234, 0)           // '1,234'`,
             },
             {
                 name: 'toRandomNumber',
                 description: 'สุ่มตัวเลขในช่วงที่กำหนด',
-                code: `const result = toRandomNumber(1, 100)
-// สุ่มตัวเลขระหว่าง 1-100`,
+                code: `// สุ่มตัวเลขระหว่าง 1-100
+toRandomNumber(1, 100)    // เช่น 42
+
+// สุ่มตัวเลขระหว่าง 0-10
+toRandomNumber(10)        // เช่น 7`,
+            },
+            {
+                name: 'toNumberByAverage',
+                description: 'คำนวณค่าเฉลี่ยจาก property ใน array of objects',
+                code: `const items = [
+  { value: 10 },
+  { value: 20 },
+  { value: 30 }
+]
+
+const avg = toNumberByAverage(items, item => item.value)
+// Result: 20`,
+            },
+            {
+                name: 'toNumberByMax',
+                description: 'หาค่าสูงสุดจาก property ใน array of objects',
+                code: `const items = [
+  { value: 10 },
+  { value: 20 },
+  { value: 30 }
+]
+
+const max = toNumberByMax(items, item => item.value)
+// Result: 30`,
+            },
+            {
+                name: 'toNumberByMin',
+                description: 'หาค่าต่ำสุดจาก property ใน array of objects',
+                code: `const items = [
+  { value: 10 },
+  { value: 20 },
+  { value: 30 }
+]
+
+const min = toNumberByMin(items, item => item.value)
+// Result: 10`,
+            },
+            {
+                name: 'toNumberBySum',
+                description: 'คำนวณผลรวมจาก property ใน array of objects',
+                code: `const items = [
+  { value: 10 },
+  { value: 20 },
+  { value: 30 }
+]
+
+const sum = toNumberBySum(items, item => item.value)
+// Result: 60`,
             },
         ],
     },
+
     {
-        category: 'Validation Utilities',
-        description: 'ฟังก์ชันสำหรับตรวจสอบข้อมูล',
-        functions: [
-            {
-                name: 'checkEmpty',
-                description: 'ตรวจสอบค่าว่าง',
-                code: `checkEmpty('') // true
-checkEmpty([]) // true
-checkEmpty({}) // true
-checkEmpty(null) // true
-checkEmpty('abc') // false`,
-            },
-            {
-                name: 'checkObject',
-                description: 'ตรวจสอบว่าเป็น object หรือไม่',
-                code: `checkObject({}) // true
-checkObject([]) // false
-checkObject(null) // false`,
-            },
-            {
-                name: 'checkEmail',
-                description: 'ตรวจสอบรูปแบบอีเมล',
-                code: `checkEmail('test@email.com') // true
-checkEmail('invalid-email') // false`,
-            },
-            {
-                name: 'checkNumber',
-                description: 'ตรวจสอบว่าเป็นตัวเลขหรือไม่',
-                code: `checkNumber(123) // true
-checkNumber('123') // true
-checkNumber('abc') // false`,
-            },
-            {
-                name: 'checkFormatDate',
-                description: 'ตรวจสอบรูปแบบวันที่',
-                code: `checkFormatDate('2024-01-01', 'YYYY-MM-DD') // true
-checkFormatDate('01/01/2024', 'DD/MM/YYYY') // true`,
-            },
-        ],
-    },
-    {
-        category: 'Service Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ service ต่างๆ',
-        functions: [
-            {
-                name: 'copyDeep',
-                description: 'สร้างสำเนาข้อมูลแบบ deep copy',
-                code: `const obj = { a: 1, b: { c: 2 } }
-const copy = copyDeep(obj)
-// สร้างสำเนาใหม่ทั้งหมด ไม่มีการอ้างอิงถึงข้อมูลเดิม`,
-            },
-            {
-                name: 'delayPromise',
-                description: 'สร้าง Promise ที่จะทำงานหลังจากเวลาที่กำหนด',
-                code: `await delayPromise(1000) // รอ 1 วินาที
-await delayPromise(2000, () => console.log('Done!'))
-// รอ 2 วินาที แล้วทำงาน callback`,
-            },
-        ],
-    },
-    {
-        category: 'Process Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ process',
+        category: 'Process Functions',
+        description: 'ฟังก์ชันสำหรับการประมวลผลและจัดการ Process',
         functions: [
             {
                 name: 'runProcess',
-                description: 'ทำงานกับ Array แบบมีลำดับขั้นตอน',
-                code: `const items = [1, 2, 3]
+                description: 'ทำงานกับ array แบบมีลำดับขั้นตอน',
+                code: `const items = ['A', 'B', 'C']
+
+// ประมวลผลทุกไอเท็ม
 runProcess(items, (item, index) => {
-  console.log(\`Processing item \${item} at index \${index}\`)
+  console.log(\`Processing \${item} at index \${index}\`)
 })
 
-// สามารถกำหนด start index ได้
-runProcess(items, callback, 1) // เริ่มจาก index 1`,
+// เริ่มจาก index ที่กำหนด
+runProcess(items, (item, index) => {
+  console.log(\`Processing \${item}\`)
+}, 1) // เริ่มจาก 'B'`,
+            },
+            {
+                name: 'delayPromise',
+                description: 'สร้าง Promise ที่ทำงานหลังจากเวลาที่กำหนด',
+                code: `// รอ 1 วินาที
+await delayPromise(1000)
+
+// รอแล้วทำงาน callback
+await delayPromise(1000, () => {
+  console.log('Done!')
+})
+
+// รอพร้อมส่งค่า
+const result = await delayPromise(
+  1000,
+  (x) => x * 2,
+  5
+)
+// Result: 10`,
+            },
+            {
+                name: 'copyDeep',
+                description: 'สร้างสำเนาข้อมูลแบบ Deep Copy',
+                code: `const original = {
+  a: 1,
+  b: { c: 2 },
+  d: [1, 2, { e: 3 }]
+}
+
+const copy = copyDeep(original)
+// สร้างสำเนาใหม่ทั้งหมด ไม่มีการอ้างอิงถึงข้อมูลเดิม`,
             },
         ],
     },
+
     {
-        category: 'Composition Utilities',
-        description: 'ฟังก์ชันสำหรับการ compose function',
+        category: 'Function Composition',
+        description:
+            'ฟังก์ชันสำหรับ Function Composition และ Higher-Order Functions',
         functions: [
             {
                 name: 'ci',
-                description: 'Chain/compose functions เข้าด้วยกัน',
+                description: 'เชื่อมต่อการทำงานของหลายฟังก์ชันเข้าด้วยกัน',
                 code: `const result = ci(
-  5,
-  x => x + 1,    // 6
-  x => x * 2     // 12
+  5,                  // ค่าเริ่มต้น
+  x => x + 1,        // 6
+  x => x * 2,        // 12
+  x => x.toString()  // "12"
 )
-// result: 12`,
+// Result: "12"`,
             },
             {
                 name: 'withCi',
                 description: 'สร้าง function composition wrapper',
-                code: `const addOne = x => x + 1
-const double = x => x * 2
+                code: `const addOne = (x: number) => x + 1
+const double = (x: number) => x * 2
+const toString = (x: number) => x.toString()
 
 const compute = withCi(
   addOne,
-  double
+  double,
+  toString
 )
 
-compute(5) // 12`,
+const result = compute(5)
+// Result: "12"`,
+            },
+            {
+                name: 'withAddDate',
+                description: 'สร้างฟังก์ชันเพิ่มจำนวนวัน',
+                code: `const addOneWeek = withAddDate(7)
+const result = addOneWeek(new Date('2024-01-01'))
+// Result: 2024-01-08
+
+const addDays = withAddDate(new Date('2024-01-01'))
+const result2 = addDays(3)
+// Result: 2024-01-04`,
+            },
+            {
+                name: 'withAddHour',
+                description: 'สร้างฟังก์ชันเพิ่มจำนวนชั่วโมง',
+                code: `const addThreeHours = withAddHour(3)
+const result = addThreeHours(new Date('2024-01-01 10:00'))
+// Result: 2024-01-01 13:00
+
+const addHours = withAddHour(new Date('2024-01-01 10:00'))
+const result2 = addHours(2)
+// Result: 2024-01-01 12:00`,
+            },
+            {
+                name: 'withAddMinute',
+                description: 'สร้างฟังก์ชันเพิ่มจำนวนนาที',
+                code: `const addHalfHour = withAddMinute(30)
+const result = addHalfHour(new Date('2024-01-01 10:00'))
+// Result: 2024-01-01 10:30
+
+const addMinutes = withAddMinute(new Date('2024-01-01 10:00'))
+const result2 = addMinutes(15)
+// Result: 2024-01-01 10:15`,
+            },
+            {
+                name: 'withAddMonth',
+                description: 'สร้างฟังก์ชันเพิ่มจำนวนเดือน',
+                code: `const addQuarter = withAddMonth(3)
+const result = addQuarter(new Date('2024-01-01'))
+// Result: 2024-04-01
+
+const addMonths = withAddMonth(new Date('2024-01-01'))
+const result2 = addMonths(2)
+// Result: 2024-03-01`,
+            },
+            {
+                name: 'withDateDiff',
+                description: 'สร้างฟังก์ชันคำนวณความต่างของวันที่',
+                code: `const date1 = new Date('2024-01-01')
+const getDaysDiff = withDateDiff(date1)
+
+const result = getDaysDiff(new Date('2024-01-15'))
+// Result: 14`,
+            },
+            {
+                name: 'withCombineText',
+                description: 'สร้างฟังก์ชันรวมข้อความด้วยตัวคั่นที่กำหนด',
+                code: `const joinWithDash = withCombineText('-')
+const result = joinWithDash(['a', 'b', 'c'])
+// Result: 'a-b-c'
+
+const items = ['x', 'y', 'z']
+const joinItems = withCombineText(items)
+const result2 = joinItems('_')
+// Result: 'x_y_z'`,
             },
         ],
     },
-]
+
+    {
+        category: 'Other Utilities',
+        description: 'ฟังก์ชันอื่นๆ',
+        functions: [
+            {
+                name: 'toUid',
+                description: 'สร้าง Unique Identifier',
+                code: `// สร้าง ID ความยาว 8 ตัวอักษร
+const id1 = toUid(8)  // เช่น 'xK4m2P9q'
+
+// สร้าง ID ความยาว 12 ตัวอักษร
+const id2 = toUid(12) // เช่น 'aB7nJ5vL2pQ8'
+
+// สร้าง ID จากตัวอักษรที่กำหนด
+const id3 = toUid(8, 'ABC123') // เช่น 'A1B2C3A1'`,
+            },
+            {
+                name: 'toConvertData',
+                description: 'แปลงข้อมูลเป็น String แบบไม่มีอักขระพิเศษ',
+                code: `const data = {
+  name: 'John Doe',
+  items: ['a', '', null, 'b'],
+  info: {
+    age: 30,
+    active: true
+  }
+}
+
+const result = toConvertData(data, true)
+// แปลงเป็น string และลบอักขระพิเศษ`,
+            },
+        ],
+    },
+] as const
 
 // แสดงผลการค้นหาพร้อม highlight
 const displayResults = computed(() => {
