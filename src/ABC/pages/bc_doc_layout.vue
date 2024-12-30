@@ -44,71 +44,64 @@ function useLayoutNavigation() {
     // ในส่วนของ menuList ใน bc_doc_layout.vue
 
     const menus = ref<MenuItem[]>([
-        // เพิ่มเมนูใหม่สำหรับ ADC Directives
-        // ใน bc_doc_layout.vue เพิ่มเมนูย่อยให้ครบถ้วน
         {
             label: 'ADC Directives',
             icon: 'Code',
             children: [
                 {
-                    label: 'Installation',
+                    label: 'Getting Started',
                     icon: 'Download',
-                    path: '/bc/adc-directives#installation',
+                    path: '/bc/adc-directives#getting-started',
                 },
                 {
-                    label: 'Basic Usage',
-                    icon: 'Code',
-                    path: '/bc/adc-directives#basic-usage',
+                    label: 'HTTP Utilities',
+                    icon: 'Globe',
+                    path: '/bc/adc-directives#http-utilities',
                 },
                 {
-                    label: 'Array Utils',
+                    label: 'Array Functions',
                     icon: 'ListFilter',
-                    path: '/bc/adc-directives#array-utilities',
+                    path: '/bc/adc-directives#array-functions',
+                },
+                {
+                    label: 'Object Functions',
+                    icon: 'Package',
+                    path: '/bc/adc-directives#object-functions',
+                },
+                {
+                    label: 'Validation Functions',
+                    icon: 'ShieldCheck',
+                    path: '/bc/adc-directives#validation-functions',
                 },
                 {
                     label: 'Date Functions',
                     icon: 'Calendar',
-                    path: '/bc/adc-directives#date-utilities',
+                    path: '/bc/adc-directives#date-functions',
                 },
                 {
-                    label: 'Object Utils',
-                    icon: 'Package',
-                    path: '/bc/adc-directives#object-utilities',
-                },
-                {
-                    label: 'String Utils',
+                    label: 'String Functions',
                     icon: 'Text',
-                    path: '/bc/adc-directives#string-utilities',
+                    path: '/bc/adc-directives#string-functions',
                 },
                 {
-                    label: 'Number Utils',
+                    label: 'Number Functions',
                     icon: 'Hash',
-                    path: '/bc/adc-directives#number-utilities',
+                    path: '/bc/adc-directives#number-functions',
                 },
                 {
-                    label: 'Conversion Utils',
-                    icon: 'RefreshCw',
-                    path: '/bc/adc-directives#conversion-utilities',
-                },
-                {
-                    label: 'Process Management',
+                    label: 'Process Functions',
                     icon: 'DatabaseZap',
-                    path: '/bc/adc-directives#process-management',
+                    path: '/bc/adc-directives#process-functions',
                 },
                 {
-                    label: 'Higher-order Functions',
-                    icon: 'ChartColumnBig',
-                    path: '/bc/adc-directives#higher-order-functions',
+                    label: 'Function Composition',
+                    icon: 'Code',
+                    path: '/bc/adc-directives#function-composition',
                 },
                 {
-                    label: 'Type Safety',
-                    icon: 'ShieldCheck',
-                    path: '/bc/adc-directives#type-safety',
-                },
-                {
-                    label: 'Best Practices',
-                    icon: 'Lightbulb',
-                    path: '/bc/adc-directives#suggestions-feedback',
+                    label: 'Other Utilities',
+                    icon: 'Bug',
+                    path: '/bc/adc-directives#other-utilities',
                 },
             ],
         },
