@@ -164,7 +164,7 @@ const {
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-slate-100">
+    <div class="flex min-h-screen">
         <!-- Aside Menu -->
         <aside
             :class="[

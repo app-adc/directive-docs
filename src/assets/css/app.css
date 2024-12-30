@@ -27,6 +27,7 @@
     --color: #1e293b; /*font color  slate 800*/
     --backdrop: rgba(0, 0, 0, 0.6);
     --disabled: #f1f5f9;
+    --background: rgb(241 245 249 / var(--tw-bg-opacity, 1));
 }
 [calendar='root'] {
     --font-family: var(--font-family) !important;
