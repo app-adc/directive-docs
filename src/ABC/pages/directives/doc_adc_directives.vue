@@ -25,6 +25,7 @@ const result = mapArray([1, [2, 3, [4, 5, [6]]]])
 // Expected: [1, 2, 3, 4, 5, 6]`,
         description: 'แปลง nested array ให้เป็น flat array',
     },
+
     chunkArray: {
         template: `import { chunkArray } from 'adc-directive'
 
@@ -32,22 +33,13 @@ const result = chunkArray([1, 2, 3, 4, 5], 2)
 // Expected: [[1,2], [3,4], [5]]`,
         description: 'แบ่ง array เป็นชุดตามจำนวนที่กำหนด',
     },
-    checkItemDuplicate: {
-        template: `import { checkItemDuplicate } from 'adc-directive'
 
-const users = [
-  { name: 'John', id: 1 },
-  { name: 'John', id: 2 }
-]
-const result = checkItemDuplicate(users, user => user.name)
-// Expected: true`,
-        description: 'ตรวจสอบค่าซ้ำใน array',
-    },
     toChangePositionArray: {
         template: `import { toChangePositionArray } from 'adc-directive'
 
-const result = toChangePositionArray(['A', 'B', 'C'])
-// Expected: ['B', 'C', 'A'] (random position)`,
+const array = ['A', 'B', 'C']
+const result = toChangePositionArray(array)
+// Expected: ['C', 'A', 'B'] (สุ่มตำแหน่ง)`,
         description: 'สลับตำแหน่งข้อมูลใน array แบบสุ่ม',
     },
 
@@ -56,113 +48,33 @@ const result = toChangePositionArray(['A', 'B', 'C'])
         template: `import { toCombineText } from 'adc-directive'
 
 const result = toCombineText(['a', 'b', null, 'c'], '_')
-// Expected: a_b_c`,
-        description: 'รวม Array เป็น string ด้วยตัวคั่นที่กำหนด',
+// Expected: 'a_b_c'`,
+        description: 'รวม array เป็น string ด้วยตัวคั่นที่กำหนด',
     },
+
     toHasKey: {
         template: `import { toHasKey } from 'adc-directive'
 
-const result = toHasKey('User-Name__123 !@#')
-// Expected: username_123`,
+const result = toHasKey('19-55 77_88*99 aBC')
+// Expected: '195577_8899abc'`,
         description: 'ลบอักขระพิเศษและช่องว่าง เหมาะสำหรับใช้เป็น key',
     },
+
+    toRegExp: {
+        template: `import { toRegExp } from 'adc-directive'
+
+const pattern = toRegExp(['th', 'en', 'number'], 'g')
+// Expected: RegExp ที่รวม patterns สำหรับภาษาไทย, อังกฤษ และตัวเลข`,
+        description: 'สร้าง RegExp จาก patterns ที่กำหนด',
+    },
+
     toReplaceTextByRegExp: {
         template: `import { toReplaceTextByRegExp } from 'adc-directive'
 
-const result = toReplaceTextByRegExp('Hello123World!', ['en', 'number'])
+const text = 'Hello123World!'
+const result = toReplaceTextByRegExp(text, ['en', 'number'])
 // Expected: 'Hello123World'`,
         description: 'แทนที่ข้อความด้วย RegExp pattern',
-    },
-
-    // Date Utilities
-    dateDiff: {
-        template: `import { dateDiff } from 'adc-directive'
-
-const result = dateDiff(new Date('2024-01-01'), new Date('2024-01-15'))
-// Expected: { days: 14, hours: 0, minutes: 0, seconds: 0 }`,
-        description: 'คำนวณความต่างระหว่างวันที่',
-    },
-    addDate: {
-        template: `import { addDate } from 'adc-directive'
-
-const result = addDate(new Date('2024-01-01'), 7)
-// Expected: 2024-01-08`,
-        description: 'เพิ่มหรือลดจำนวนวัน',
-    },
-    addMonth: {
-        template: `import { addMonth } from 'adc-directive'
-
-const result = addMonth(new Date('2024-01-01'), 2)
-// Expected: 2024-03-01`,
-        description: 'เพิ่มหรือลดจำนวนเดือน',
-    },
-    addHour: {
-        template: `import { addHour } from 'adc-directive'
-
-const result = addHour(new Date('2024-01-01 10:00'), 3)
-// Expected: 2024-01-01 13:00`,
-        description: 'เพิ่มหรือลดจำนวนชั่วโมง',
-    },
-    addMinute: {
-        template: `import { addMinute } from 'adc-directive'
-
-const result = addMinute(new Date('2024-01-01 10:00'), 30)
-// Expected: 2024-01-01 10:30`,
-        description: 'เพิ่มหรือลดจำนวนนาที',
-    },
-    dateToCombine: {
-        template: `import { dateToCombine } from 'adc-directive'
-
-const result = dateToCombine(new Date('2024-01-01'))
-// Expected: {
-//   valueOfDate: '2024-01-01',
-//   valueOfTime: '00:00:00',
-//   valueOfValue: '2024-01-01 00:00:00',
-//   th: '1 มกราคม 2567'
-// }`,
-        description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
-    },
-
-    // Object Utilities
-    mergeObject: {
-        template: `import { mergeObject } from 'adc-directive'
-
-const result = mergeObject(
-  { a: 1, b: { c: 2 } },
-  { b: { d: 3 }, e: 4 }
-)
-// Expected: { a: 1, b: { c: 2, d: 3 }, e: 4 }`,
-        description: 'รวม objects แบบ deep merge',
-    },
-    findObjectByKey: {
-        template: `import { findObjectByKey } from 'adc-directive'
-
-const obj = { user: { profile: { name: 'John' } } }
-const result = findObjectByKey(obj, ['user.profile.name'])
-// Expected: true`,
-        description: 'ค้นหา key ใน object แบบ nested',
-    },
-    selectObject: {
-        template: `import { selectObject } from 'adc-directive'
-
-const obj = { id: 1, name: 'John', age: 30 }
-const result = selectObject(obj, ['id', 'name'])
-// Expected: { id: 1, name: 'John' }`,
-        description: 'เลือกเฉพาะ keys ที่ต้องการ',
-    },
-    checkNestedValue: {
-        template: `import { checkNestedValue } from 'adc-directive'
-
-const data = {
-  colors: ['red', 'blue'],
-  user: { name: 'John' }
-}
-const result = checkNestedValue(data, {
-  colors: ['red', 'blue'],
-  'user.name': 'John'
-})
-// Expected: true`,
-        description: 'ตรวจสอบค่าใน nested object',
     },
 
     // Number Utilities
@@ -174,6 +86,7 @@ const result2 = toNumber('abc')    // Expected: 0
 const result3 = toNumber(null)     // Expected: 0`,
         description: 'แปลงค่าเป็นตัวเลข',
     },
+
     toCurrency: {
         template: `import { toCurrency } from 'adc-directive'
 
@@ -181,6 +94,7 @@ const result = toCurrency(1234567.89, 2)
 // Expected: '1,234,567.89'`,
         description: 'จัดรูปแบบตัวเลขให้อยู่ในรูปแบบเงิน',
     },
+
     toRandomNumber: {
         template: `import { toRandomNumber } from 'adc-directive'
 
@@ -189,36 +103,365 @@ const result = toRandomNumber(1, 100)
         description: 'สุ่มตัวเลขในช่วงที่กำหนด',
     },
 
+    toNumberByAverage: {
+        template: `import { toNumberByAverage } from 'adc-directive'
+
+const items = [
+  { value: 10 }, { value: 20 }, { value: 30 }
+]
+const result = toNumberByAverage(items, item => item.value)
+// Expected: 20`,
+        description: 'คำนวณค่าเฉลี่ยจาก array of objects',
+    },
+
+    toNumberByMax: {
+        template: `import { toNumberByMax } from 'adc-directive'
+
+const items = [
+  { value: 10 }, { value: 20 }, { value: 30 }
+]
+const result = toNumberByMax(items, item => item.value)
+// Expected: 30`,
+        description: 'หาค่าสูงสุดจาก array of objects',
+    },
+
+    toNumberByMin: {
+        template: `import { toNumberByMin } from 'adc-directive'
+
+const items = [
+  { value: 10 }, { value: 20 }, { value: 30 }
+]
+const result = toNumberByMin(items, item => item.value)
+// Expected: 10`,
+        description: 'หาค่าต่ำสุดจาก array of objects',
+    },
+
+    toNumberBySum: {
+        template: `import { toNumberBySum } from 'adc-directive'
+
+const items = [
+  { value: 10 },
+  { value: 20 },
+  { value: 30 }
+]
+const result = toNumberBySum(items, item => item.value)
+// Expected: 60`,
+        description: 'คำนวณผลรวมจาก property ใน array of objects',
+    },
+
+    // Date Utilities
+    dateDiff: {
+        template: `import { dateDiff } from 'adc-directive'
+
+const result = dateDiff(new Date('2024-01-01'), new Date('2024-01-15'))
+/* Expected: {
+  days: 14,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+  milliseconds: 1209600000
+} */`,
+        description: 'คำนวณความต่างระหว่างวันที่',
+    },
+
+    dateDiffToString: {
+        template: `import { dateDiffToString } from 'adc-directive'
+
+const result = dateDiffToString(
+  new Date('2024-01-01'),
+  new Date('2024-02-01'),
+  'th'
+)
+// Expected: '1 เดือนที่แล้ว'`,
+        description: 'แสดงความต่างของวันที่ในรูปแบบข้อความ',
+    },
+
+    dateToCombine: {
+        template: `import { dateToCombine } from 'adc-directive'
+
+const result = dateToCombine(new Date('2024-01-01'))
+/* Expected: {
+  valueOfDate: '2024-01-01',
+  valueOfTime: '00:00:00',
+  valueOfValue: '2024-01-01 00:00:00',
+  th: '1 มกราคม 2567'
+} */`,
+        description: 'แปลงวันที่เป็นรูปแบบต่างๆ',
+    },
+
+    // Date Manipulation
+    addDate: {
+        template: `import { addDate } from 'adc-directive'
+
+const result = addDate(new Date('2024-01-01'), 7)
+// Expected: 2024-01-08`,
+        description: 'เพิ่มหรือลดจำนวนวัน',
+    },
+
+    addMonth: {
+        template: `import { addMonth } from 'adc-directive'
+
+const result = addMonth(new Date('2024-01-01'), 2)
+// Expected: 2024-03-01`,
+        description: 'เพิ่มหรือลดจำนวนเดือน',
+    },
+
+    addHour: {
+        template: `import { addHour } from 'adc-directive'
+
+const result = addHour(new Date('2024-01-01 10:00'), 3)
+// Expected: 2024-01-01 13:00`,
+        description: 'เพิ่มหรือลดจำนวนชั่วโมง',
+    },
+
+    addMinute: {
+        template: `import { addMinute } from 'adc-directive'
+
+const result = addMinute(new Date('2024-01-01 10:00'), 30)
+// Expected: 2024-01-01 10:30`,
+        description: 'เพิ่มหรือลดจำนวนนาที',
+    },
+
+    // Object Utilities
+    mergeObject: {
+        template: `import { mergeObject } from 'adc-directive'
+
+const obj1 = { a: 1, b: { c: 2 } }
+const obj2 = { b: { d: 3 }, e: 4 }
+const result = mergeObject(obj1, obj2)
+// Expected: { a: 1, b: { c: 2, d: 3 }, e: 4 }`,
+        description: 'รวม object หลายตัวเข้าด้วยกันแบบ deep merge',
+    },
+
+    findObjectByKey: {
+        template: `import { findObjectByKey } from 'adc-directive'
+
+const obj = { user: { profile: { name: 'John' } } }
+const exists = findObjectByKey(obj, ['user.profile.name'])
+// Expected: true`,
+        description: 'ค้นหา key ใน object แบบ nested',
+    },
+
+    createObj: {
+        template: `import { createObj } from 'adc-directive'
+
+const obj = { user: { profile: { name: 'John' } } }
+const result = createObj(obj, 'user.profile')
+// Expected: { user: { profile: { name: 'John' } } }`,
+        description: 'สร้าง object จาก path',
+    },
+
+    selectObject: {
+        template: `import { selectObject } from 'adc-directive'
+
+const obj = { id: 1, name: 'John', age: 30 }
+const result = selectObject(obj, ['id', 'name'])
+// Expected: { id: 1, name: 'John' }`,
+        description: 'เลือกเฉพาะบาง keys จาก object',
+    },
+
+    checkNestedValue: {
+        template: `import { checkNestedValue } from 'adc-directive'
+
+const data = {
+  user: {
+    profile: {
+      name: 'John',
+      hobbies: ['reading', 'gaming']
+    }
+  }
+}
+
+const result = checkNestedValue(data, {
+  'user.profile.name': 'John',
+  'user.profile.hobbies': ['reading', 'gaming']
+})
+// Expected: true`,
+        description: 'ตรวจสอบค่าใน nested object อย่างละเอียด',
+    },
+
+    mapToKeys: {
+        template: `import { mapToKeys } from 'adc-directive'
+
+const result = mapToKeys('profile.name.colors[2].length')
+// Expected: ['profile', 'name', 'colors', '2', 'length']`,
+        description: 'แปลง path string เป็น array ของ keys',
+    },
+
+    // Payload Utilities
+    payloadByMax: {
+        template: `import { payloadByMax } from 'adc-directive'
+
+const items = [
+  { id: 1, value: 100 },
+  { id: 2, value: 200 },
+  { id: 3, value: 150 }
+]
+const result = payloadByMax(items, item => item.value)
+// Expected: { id: 2, value: 200 }`,
+        description: 'หา object ที่มีค่ามากที่สุดตาม property ที่กำหนด',
+    },
+
+    payloadByMin: {
+        template: `import { payloadByMin } from 'adc-directive'
+
+const items = [
+  { id: 1, value: 100 },
+  { id: 2, value: 200 },
+  { id: 3, value: 150 }
+]
+const result = payloadByMin(items, item => item.value)
+// Expected: { id: 1, value: 100 }`,
+        description: 'หา object ที่มีค่าน้อยที่สุดตาม property ที่กำหนด',
+    },
+
+    toPayloadByGroup: {
+        template: `import { toPayloadByGroup } from 'adc-directive'
+
+const items = [
+  { category: 'A', value: 1 },
+  { category: 'B', value: 2 },
+  { category: 'A', value: 3 }
+]
+const result = toPayloadByGroup(items, item => item.category)
+/* Expected: {
+  A: [{ category: 'A', value: 1 }, { category: 'A', value: 3 }],
+  B: [{ category: 'B', value: 2 }]
+} */`,
+        description: 'จัดกลุ่ม array of objects ตาม key ที่กำหนด',
+    },
+
+    toPayloadByKey: {
+        template: `import { toPayloadByKey } from 'adc-directive'
+
+const items = [
+  { id: 'a', value: 1 },
+  { id: 'b', value: 2 }
+]
+const result = toPayloadByKey(items, item => item.id)
+/* Expected: {
+  a: { id: 'a', value: 1 },
+  b: { id: 'b', value: 2 }
+} */`,
+        description: 'แปลง array เป็น object โดยใช้ค่าจาก property เป็น key',
+    },
+
     // Validation Utilities
-    checkEmpty: {
-        template: `import { checkEmpty } from 'adc-directive'
+    validateObject: {
+        template: `import { validateObject } from 'adc-directive'
 
-const result1 = checkEmpty('')     // Expected: true
-const result2 = checkEmpty([])     // Expected: true
-const result3 = checkEmpty({})     // Expected: true
-const result4 = checkEmpty('abc')  // Expected: false`,
-        description: 'ตรวจสอบค่าว่าง',
+const data = {
+  id: 1,
+  user: { name: 'John' }
+}
+const result = validateObject(data, ['id', 'user.name'], 'User Data')
+// Expected: { status: 1, message: '' }`,
+        description: 'ตรวจสอบ key ใน object เชิงลึก',
     },
-    checkObject: {
-        template: `import { checkObject } from 'adc-directive'
 
-const result1 = checkObject({})        // Expected: true
-const result2 = checkObject([])        // Expected: false
-const result3 = checkObject(null)      // Expected: false`,
-        description: 'ตรวจสอบว่าเป็น object',
-    },
     validateEmail: {
         template: `import { validateEmail } from 'adc-directive'
 
-const result = validateEmail('test@email.com', {
+const result = validateEmail('test@example.com', {
   allowEmpty: false,
-  maxLength: 100
+  maxLength: 100,
+  allowedDomains: ['example.com']
 })
 // Expected: { isValid: true, message: '' }`,
         description: 'ตรวจสอบความถูกต้องของอีเมล',
     },
 
-    // Composition Utilities
+    validatePayloadEmptyToNull: {
+        template: `import { validatePayloadEmptyToNull } from 'adc-directive'
+
+const data = {
+  name: '',
+  age: 0,
+  items: [],
+  address: {
+    street: '',
+    city: 'Bangkok'
+  }
+}
+const result = validatePayloadEmptyToNull(data)
+/* Expected: {
+  name: null,
+  age: 0,
+  items: null,
+  address: {
+    street: null,
+    city: 'Bangkok'
+  }
+} */`,
+        description: 'แปลงค่าว่างทั้งหมดใน object เป็น null',
+    },
+
+    checkFormatDate: {
+        template: `import { checkFormatDate } from 'adc-directive'
+
+const result1 = checkFormatDate('2024-01-01', 'YYYY-MM-DD')
+// Expected: true
+
+const result2 = checkFormatDate('01/01/2024', 'DD/MM/YYYY')
+// Expected: true`,
+        description: 'ตรวจสอบรูปแบบวันที่ตามฟอร์แมตที่กำหนด',
+    },
+
+    // Process Utilities
+    runProcess: {
+        template: `import { runProcess } from 'adc-directive'
+
+const items = [1, 2, 3]
+runProcess(items, (item, index) => {
+  console.log(\`Processing item \${item} at index \${index}\`)
+}, 0)`,
+        description: 'ทำงานกับ array แบบมีลำดับขั้นตอน',
+    },
+
+    delayPromise: {
+        template: `import { delayPromise } from 'adc-directive'
+
+// รอ 1 วินาที
+await delayPromise(1000)
+
+// รอแล้วทำงาน callback
+await delayPromise(1000, () => console.log('Done!'))
+
+// รอพร้อมส่งค่า
+const result = await delayPromise(1000, (x) => x * 2, 5)
+// Expected: 10`,
+        description: 'สร้าง Promise ที่ทำงานหลังจากเวลาที่กำหนด',
+    },
+
+    copyDeep: {
+        template: `import { copyDeep } from 'adc-directive'
+
+const obj = { 
+  a: 1, 
+  b: { c: 2 },
+  d: [1, 2, { e: 3 }]
+}
+const result = copyDeep(obj)
+// Expected: deep copy with no references to original`,
+        description: 'สร้างสำเนาข้อมูลแบบ deep copy',
+    },
+
+    // HTTP Client
+    ADC: {
+        template: `import { ADC } from 'adc-directive'
+
+const api = new ADC<RequestType, ResponseType>()
+const response = await api.request({
+  baseURL: 'https://api.example.com',
+  method: 'POST',
+  variables: { id: 1 },
+  storage: 'cache',
+  timeToLive: 60000
+})`,
+        description: 'จัดการ HTTP requests พร้อม caching',
+    },
+
+    // Function Composition
     ci: {
         template: `import { ci } from 'adc-directive'
 
@@ -230,38 +473,143 @@ const result = ci(
 // Expected: 12`,
         description: 'Chain/compose functions เข้าด้วยกัน',
     },
+
     withCi: {
         template: `import { withCi } from 'adc-directive'
 
-const addOne = x => x + 1
-const double = x => x * 2
+const addOne = (x: number) => x + 1
+const double = (x: number) => x * 2
 
 const compute = withCi(addOne, double)
-const result = compute(5)
-// Expected: 12`,
+const result = compute(5)  // Expected: 12`,
         description: 'สร้าง function composition wrapper',
     },
 
-    // Service Utilities
-    copyDeep: {
-        template: `import { copyDeep } from 'adc-directive'
+    withAddDate: {
+        template: `import { withAddDate } from 'adc-directive'
 
-const obj = { a: 1, b: { c: 2 } }
-const result = copyDeep(obj)
-// Expected: deep copy of object`,
-        description: 'สร้างสำเนาข้อมูลแบบ deep copy',
+const addWeek = withAddDate(7)
+const result = addWeek(new Date('2024-01-01'))
+// Expected: 2024-01-08`,
+        description: 'สร้างฟังก์ชันเพิ่มจำนวนวัน',
     },
-    delayPromise: {
-        template: `import { delayPromise } from 'adc-directive'
 
-// รอ 1 วินาที
-await delayPromise(1000)
+    withAddHour: {
+        template: `import { withAddHour } from 'adc-directive'
 
-// รอแล้วทำงาน callback
-await delayPromise(1000, () => console.log('Done!'))`,
-        description: 'สร้าง Promise ที่ทำงานหลังจากเวลาที่กำหนด',
+const addThreeHours = withAddHour(3)
+const result = addThreeHours(new Date('2024-01-01 10:00'))
+// Expected: 2024-01-01 13:00`,
+        description: 'สร้างฟังก์ชันเพิ่มจำนวนชั่วโมง',
     },
+
+    withAddMinute: {
+        template: `import { withAddMinute } from 'adc-directive'
+
+const addHalfHour = withAddMinute(30)
+const result = addHalfHour(new Date('2024-01-01 10:00'))
+// Expected: 2024-01-01 10:30`,
+        description: 'สร้างฟังก์ชันเพิ่มจำนวนนาที',
+    },
+
+    withAddMonth: {
+        template: `import { withAddMonth } from 'adc-directive'
+
+const addQuarter = withAddMonth(3)
+const result = addQuarter(new Date('2024-01-01'))
+// Expected: 2024-04-01`,
+        description: 'สร้างฟังก์ชันเพิ่มจำนวนเดือน',
+    },
+
+    withDateDiff: {
+        template: `import { withDateDiff } from 'adc-directive'
+
+const date1 = new Date('2024-01-01')
+const getDaysDiff = withDateDiff(date1)
+const result = getDaysDiff(new Date('2024-01-15'))
+// Expected: 14`,
+        description: 'สร้างฟังก์ชันคำนวณความต่างของวันที่',
+    },
+
+    withCombineText: {
+        template: `import { withCombineText } from 'adc-directive'
+
+const combineWithDash = withCombineText('-')
+const result = combineWithDash(['a', 'b', 'c'])
+// Expected: 'a-b-c'`,
+        description: 'สร้างฟังก์ชันรวมข้อความด้วยตัวคั่นที่กำหนด',
+    },
+
+    // Check Utilities
+    checkEmpty: {
+        template: `import { checkEmpty } from 'adc-directive'
+
+checkEmpty('')        // true
+checkEmpty([])       // true
+checkEmpty({})       // true
+checkEmpty(null)     // true
+checkEmpty('abc')    // false`,
+        description: 'ตรวจสอบค่าว่าง',
+    },
+
+    checkObject: {
+        template: `import { checkObject } from 'adc-directive'
+
+checkObject({})        // true
+checkObject([])        // false
+checkObject(null)      // false`,
+        description: 'ตรวจสอบว่าเป็น object',
+    },
+
+    checkEmail: {
+        template: `import { checkEmail } from 'adc-directive'
+
+checkEmail('test@email.com')   // true
+checkEmail('invalid-email')    // false`,
+        description: 'ตรวจสอบรูปแบบอีเมล',
+    },
+
+    checkNumber: {
+        template: `import { checkNumber } from 'adc-directive'
+
+checkNumber(123)       // true
+checkNumber('123')     // true
+checkNumber('abc')     // false`,
+        description: 'ตรวจสอบว่าเป็นตัวเลข',
+    },
+
+    toConvertData: {
+        template: `import { toConvertData } from 'adc-directive'
+
+const data = {
+  name: 'John',
+  items: ['a', '', null, 'b']
 }
+const result = toConvertData(data, true)
+// Expected: cleaned data without special characters`,
+        description: 'แปลงข้อมูลเป็น string แบบไม่มีอักขระพิเศษ',
+    },
+
+    toUid: {
+        template: `import { toUid } from 'adc-directive'
+
+const result = toUid(8)  // Expected: 'xK4m2P9q'
+const customResult = toUid(12, 'ABC123') // Expected: 'A1B2C3A1B2C3'`,
+        description: 'สร้าง unique identifier',
+    },
+
+    checkItemDuplicate: {
+        template: `import { checkItemDuplicate } from 'adc-directive'
+
+const users = [
+  { name: 'John', id: 1 },
+  { name: 'John', id: 2 }
+]
+const result = checkItemDuplicate(users, user => user.name)
+// Expected: true (พบชื่อซ้ำ)`,
+        description: 'ตรวจสอบค่าซ้ำใน array',
+    },
+} as const
 
 // สำหรับการค้นหา
 const route = useRoute()
@@ -300,7 +648,7 @@ const result = mapArray(nestedArray)
             {
                 name: 'chunkArray',
                 description: 'แบ่ง Array เป็นชุดตามจำนวนที่กำหนด',
-                code: `const items = [1, 2, 3, 4, 5] 
+                code: `const items = [1, 2, 3, 4, 5]
 const result = chunkArray(items, 2)
 // result: [[1, 2], [3, 4], [5]]`,
             },
@@ -427,7 +775,7 @@ const result = selectObject(obj, ['id', 'name'])
             {
                 name: 'checkNestedValue',
                 description: 'ตรวจสอบค่าใน nested object',
-                code: `const obj = { 
+                code: `const obj = {
   colors: ['red', 'blue'],
   user: { name: 'John' }
 }
@@ -564,7 +912,7 @@ runProcess(items, callback, 1) // เริ่มจาก index 1`,
 const double = x => x * 2
 
 const compute = withCi(
-  addOne, 
+  addOne,
   double
 )
 
