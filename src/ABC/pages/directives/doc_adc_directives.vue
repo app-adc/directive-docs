@@ -633,6 +633,97 @@ const highlightText = (text: string): string => {
 
 // รายละเอียดทั้งหมดของ utilities แยกตามหมวดหมู่
 const utilityExamples = [
+    // เพิ่มส่วนนี้เข้าไปในตัวแปร utilityExamples ก่อนหมวดหมู่อื่นๆ
+    {
+        category: 'Getting Started',
+        description: 'การติดตั้งและเริ่มต้นใช้งาน ADC Directive',
+        functions: [
+            {
+                name: 'Installation',
+                description: 'วิธีติดตั้งผ่าน npm หรือ yarn',
+                code: `# Using npm
+npm install adc-directive
+
+# Using yarn
+yarn add adc-directive
+
+# Using pnpm
+pnpm add adc-directive`,
+            },
+            {
+                name: 'Basic Usage',
+                description: 'การใช้งานพื้นฐาน',
+                code: `// นำเข้าทั้งหมด
+import * as dc from 'adc-directive'
+
+// นำเข้าเฉพาะฟังก์ชันที่ต้องการ
+import { toCombineText, toNumber, addDate } from 'adc-directive'
+
+// ตัวอย่างการใช้งาน
+const text = dc.toCombineText(['a', 'b', null, 'c'], '_')
+// Result: 'a_b_c'
+
+const num = dc.toNumber('123')
+// Result: 123
+
+const tomorrow = dc.addDate(new Date(), 1)
+// Result: Date object of tomorrow`,
+            },
+            {
+                name: 'TypeScript Support',
+                description: 'การใช้งานกับ TypeScript',
+                code: `import { ADC } from 'adc-directive'
+
+// กำหนด types สำหรับ request และ response
+interface UserRequest {
+  id: number
+}
+
+interface UserResponse {
+  id: number
+  name: string
+  email: string
+}
+
+// สร้าง instance พร้อม type safety
+const api = new ADC<UserRequest, UserResponse>()
+
+// TypeScript จะช่วยตรวจสอบ types
+const response = await api.request({
+  baseURL: 'https://api.example.com',
+  method: 'POST',
+  variables: {
+    id: 1  // ต้องตรงกับ UserRequest
+  }
+})`,
+            },
+            {
+                name: 'Features Overview',
+                description: 'ความสามารถหลักของ ADC Directive',
+                code: `// 1. Function Composition
+import { ci } from 'adc-directive'
+const result = ci(5, x => x + 1, x => x * 2)  // 12
+
+// 2. Array Manipulation
+import { mapArray, chunkArray } from 'adc-directive'
+const flat = mapArray([1, [2, [3]]])  // [1, 2, 3]
+const chunks = chunkArray([1,2,3,4], 2)  // [[1,2], [3,4]]
+
+// 3. Date Handling
+import { dateDiff, addDate } from 'adc-directive'
+const diff = dateDiff(date1, date2)
+const future = addDate(new Date(), 7)
+
+// 4. HTTP Client with Caching
+import { ADC } from 'adc-directive'
+const api = new ADC()
+const response = await api.request({
+  storage: 'cache',
+  timeToLive: 60000  // 1 minute cache
+})`,
+            },
+        ],
+    },
     {
         category: 'HTTP Utilities',
         description: 'ฟังก์ชันสำหรับจัดการ HTTP Requests',
