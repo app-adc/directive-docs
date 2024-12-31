@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IconName } from '@/ABC/bc-types'
 import BcIcon from '@/ABC/components/BcIcon.vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 
 // Types
@@ -35,13 +35,24 @@ const emit = defineEmits<{
     (e: 'collapse'): void
 }>()
 
+// Responsive state
+const isMobile = ref(false)
+const showMobileMenu = ref(false)
+
+// Watch mobile menu state
+watch(showMobileMenu, (isOpen) => {
+    if (isOpen) {
+        document.body.classList.add('menu-open')
+    } else {
+        document.body.classList.remove('menu-open')
+    }
+})
+
 // Composables
 function useLayoutNavigation() {
     const router = useRouter()
     const isCollapsed = ref(false)
     const activeMenuItem = ref<string | null>(null)
-
-    // ในส่วนของ menuList ใน bc_doc_layout.vue
 
     const menus = ref<MenuItem[]>([
         {
@@ -112,17 +123,21 @@ function useLayoutNavigation() {
             activeMenuItem.value =
                 typeof item.path === 'string' ? item.path : null
             router.push(item.path)
+            if (isMobile.value) {
+                showMobileMenu.value = false
+            }
         }
     }
 
     const toggleCollapse = () => {
-        isCollapsed.value = !isCollapsed.value
-        emit('collapse')
+        if (!isMobile.value) {
+            isCollapsed.value = !isCollapsed.value
+            emit('collapse')
+        }
     }
 
-    // Computed values for dynamic classes
     const asideWidth = computed(() =>
-        isCollapsed.value ? 'w-[4rem]' : 'w-[16rem]'
+        isCollapsed.value && !isMobile.value ? 'w-[4rem]' : 'w-[16rem]'
     )
 
     const headerClass = computed(() => ({
@@ -151,7 +166,24 @@ function useLayoutNavigation() {
     }
 }
 
-// Use the composable
+// Setup responsive behavior
+onMounted(() => {
+    const checkMobile = () => {
+        isMobile.value = window.innerWidth < 1024
+        if (isMobile.value) {
+            showMobileMenu.value = false
+        }
+    }
+
+    window.addEventListener('resize', checkMobile)
+    checkMobile()
+
+    onUnmounted(() => {
+        window.removeEventListener('resize', checkMobile)
+        document.body.classList.remove('menu-open')
+    })
+})
+
 const {
     menus,
     isCollapsed,
@@ -164,21 +196,49 @@ const {
 </script>
 
 <template>
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen bg-slate-100">
+        <!-- Mobile Header -->
+        <div
+            v-if="isMobile"
+            class="fixed top-0 left-0 right-0 z-30 flex items-center px-4 py-3 bg-white border-b"
+        >
+            <button
+                @click="showMobileMenu = true"
+                class="p-2 hover:bg-slate-50 rounded-lg"
+            >
+                <BcIcon name="Menu" size="24" />
+            </button>
+            <h1 class="text-lg font-semibold">{{ title }}</h1>
+        </div>
+
+        <!-- Mobile Overlay -->
+        <div
+            v-if="showMobileMenu && isMobile"
+            @click="showMobileMenu = false"
+            class="fixed inset-0 bg-black/50 z-40"
+        />
+
         <!-- Aside Menu -->
         <aside
             :class="[
                 asideWidth,
                 'border-r border-border bg-white transition-all duration-300',
+                'fixed top-0 left-0 h-full flex flex-col z-50',
+                {
+                    'translate-x-0 fixed': showMobileMenu || !isMobile,
+                    '-translate-x-full': !showMobileMenu && isMobile,
+                },
             ]"
-            class="fixed h-screen"
         >
             <!-- Header -->
             <div
-                class="flex h-16 items-center justify-between px-4 border-b border-border"
+                class="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-border"
             >
                 <transition name="fade">
-                    <div v-if="!isCollapsed" class="flex items-center gap-2">
+                    <div
+                        v-if="!isCollapsed || isMobile"
+                        class="flex items-center gap-2"
+                    >
                         <BcIcon name="Box" size="24" color="primary" />
                         <h1 class="text-lg font-bold text-slate-800">
                             {{ title }}
@@ -186,6 +246,14 @@ const {
                     </div>
                 </transition>
                 <button
+                    v-if="isMobile"
+                    @click="showMobileMenu = false"
+                    class="p-2 hover:bg-slate-50 rounded-lg"
+                >
+                    <BcIcon name="X" size="20" />
+                </button>
+                <button
+                    v-else
                     @click="toggleCollapse"
                     class="p-2 rounded-lg hover:bg-slate-100 transition-colors"
                 >
@@ -198,13 +266,13 @@ const {
 
             <!-- Navigation -->
             <nav
-                class="flex flex-col py-4 space-y-1 h-[calc(100vh-4rem)] overflow-y-auto"
+                class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1"
             >
                 <template v-for="item in menus" :key="item.label">
                     <!-- Group with Children -->
                     <div v-if="item.children" class="space-y-1">
                         <div
-                            v-if="!isCollapsed"
+                            v-if="!isCollapsed || isMobile"
                             class="px-4 py-2 text-xs font-bold text-slate-400 uppercase"
                         >
                             {{ item.label }}
@@ -219,7 +287,7 @@ const {
                             <BcIcon :name="child.icon" size="20" />
                             <transition name="fade">
                                 <div
-                                    v-if="!isCollapsed"
+                                    v-if="!isCollapsed || isMobile"
                                     class="flex items-center justify-between flex-1"
                                 >
                                     <span class="text-sm">{{
@@ -245,9 +313,11 @@ const {
                     >
                         <BcIcon :name="item.icon" size="20" />
                         <transition name="fade">
-                            <span v-if="!isCollapsed" class="text-sm">{{
-                                item.label
-                            }}</span>
+                            <span
+                                v-if="!isCollapsed || isMobile"
+                                class="text-sm"
+                                >{{ item.label }}</span
+                            >
                         </transition>
                     </router-link>
                 </template>
@@ -257,8 +327,12 @@ const {
         <!-- Main Content -->
         <div
             :class="[
-                isCollapsed ? 'ml-16' : 'ml-64',
-                'flex-1 transition-all duration-300',
+                {
+                    'lg:ml-16': isCollapsed && !isMobile,
+                    'lg:ml-64': !isCollapsed && !isMobile,
+                },
+                { 'mt-16': isMobile },
+                'flex-1 transition-all duration-300 flex flex-col',
             ]"
         >
             <!-- Header -->
@@ -292,14 +366,14 @@ const {
 
             <!-- Main Content -->
             <main
-                class="p-6"
+                class="flex-1 p-4 lg:p-6"
                 :class="{ 'opacity-50 pointer-events-none': loading }"
             >
                 <slot />
             </main>
 
             <!-- Footer -->
-            <footer class="px-6 py-4 border-t border-border bg-white mt-auto">
+            <footer class="px-6 py-4 border-t border-border bg-white">
                 <slot name="footer">
                     <div class="text-sm text-slate-500 text-center">
                         © {{ new Date().getFullYear() }} ABC Components. All
@@ -327,10 +401,11 @@ const {
 nav {
     scrollbar-width: thin;
     scrollbar-color: #e2e8f0 transparent;
+    -webkit-overflow-scrolling: touch;
 }
 
 nav::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 nav::-webkit-scrollbar-track {
@@ -339,10 +414,16 @@ nav::-webkit-scrollbar-track {
 
 nav::-webkit-scrollbar-thumb {
     background-color: #e2e8f0;
-    border-radius: 3px;
+    border-radius: 2px;
 }
 
-/* ปรับแต่ง scrollbar */
+/* Prevent body scroll when mobile menu is open */
+body.menu-open {
+    overflow: hidden;
+    touch-action: none;
+}
+
+/* Main scrollbar customization */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -362,12 +443,12 @@ nav::-webkit-scrollbar-thumb {
     background: #666;
 }
 
-/* ปรับแต่ง card effect */
+/* Card effects */
 .shadow-lg {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* ปรับแต่ง code blocks */
+/* Code block customization */
 pre {
     font-family: 'Fira Code', monospace;
     padding: 1rem;
@@ -386,5 +467,14 @@ code {
 
 .bg-slate-800 :deep(.bg-white:hover) {
     --tw-bg-opacity: 1;
+}
+
+/* Mobile menu transitions */
+.translate-x-0 {
+    transform: translateX(0);
+}
+
+.-translate-x-full {
+    transform: translateX(-100%);
 }
 </style>
