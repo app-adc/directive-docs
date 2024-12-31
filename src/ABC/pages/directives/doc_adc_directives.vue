@@ -1547,7 +1547,7 @@ const handleExampleChange = (example: string) => {
         icon="Code"
     >
         <!-- Search Section -->
-        <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <section class="bg-white rounded-xl shadow-lg p-6 mb-8 w-full">
             <div class="flex items-center gap-3 mb-6">
                 <BcIcon name="Search" size="24" color="primary" />
                 <div class="flex-1">
@@ -1580,7 +1580,7 @@ const handleExampleChange = (example: string) => {
         <!-- Interactive Playground -->
         <section
             v-if="!searchQuery.trim()"
-            class="bg-white rounded-xl shadow-lg p-6 mb-8"
+            class="bg-white rounded-xl shadow-lg p-6 mb-8 w-full"
         >
             <div class="flex items-center gap-3 mb-6">
                 <BcIcon name="Palette" size="24" color="primary" />
@@ -1592,8 +1592,8 @@ const handleExampleChange = (example: string) => {
                 </div>
             </div>
 
-            <div class="grid gap-4">
-                <div class="flex gap-4">
+            <div class="grid gap-y-4">
+                <div class="flex gap-4 flex-col lg:flex-row">
                     <select
                         v-model="selectedExample"
                         class="px-4 py-2 border rounded"
@@ -1626,7 +1626,7 @@ const handleExampleChange = (example: string) => {
                     />
                     <textarea
                         v-model="codeInput"
-                        class="w-full h-40 p-4 font-mono text-sm bg-transparent text-white focus:outline-none"
+                        class="w-full h-40 font-mono text-sm bg-transparent text-white focus:outline-none"
                     />
                 </div>
 
@@ -1642,7 +1642,7 @@ const handleExampleChange = (example: string) => {
                 :id="category?.category?.toLowerCase().replace(/ /g, '-')"
                 class="mb-8"
             >
-                <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center gap-3 mb-6 pl-4">
                     <BcIcon name="Code" size="24" color="primary" />
                     <div>
                         <h2 class="text-xl font-bold">
@@ -1658,7 +1658,7 @@ const handleExampleChange = (example: string) => {
                     <div
                         v-for="func in category?.functions"
                         :key="func.name"
-                        class="bg-white rounded-xl shadow-lg p-6"
+                        class="bg-white rounded-xl shadow-lg p-6 w-full"
                     >
                         <h3
                             class="text-lg font-bold mb-2"
@@ -1708,7 +1708,6 @@ const handleExampleChange = (example: string) => {
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-family: ui-monospace, monospace;
     background-color: rgb(30 41 59); /* slate-800 */
     color: #e2e8f0; /* slate-200 */
     padding: 1rem;
@@ -1790,7 +1789,6 @@ textarea.code-input {
     background-color: rgb(30 41 59);
     color: #e2e8f0;
     width: 100%;
-    font-family: ui-monospace, monospace;
     resize: vertical;
     min-height: 150px;
 }
