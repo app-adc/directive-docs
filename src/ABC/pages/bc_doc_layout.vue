@@ -366,7 +366,7 @@ const {
 
             <!-- Main Content -->
             <main
-                class="flex-1 p-4 lg:p-6"
+                class="flex-1 p-2 lg:p-6"
                 :class="{ 'opacity-50 pointer-events-none': loading }"
             >
                 <slot />
