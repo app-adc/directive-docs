@@ -1545,9 +1545,11 @@ const handleExampleChange = (example: string) => {
         title="ADC Directive"
         subtitle="Utility functions สำหรับ TypeScript/JavaScript"
         icon="Code"
+        style="-webkit-text-size-adjust: none; touch-action: pan-y pinch-zoom"
+        class="w-full"
     >
         <!-- Search Section -->
-        <section class="bg-white rounded-xl shadow-lg p-6 mb-8 w-full">
+        <section class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div class="flex items-center gap-3 mb-6">
                 <BcIcon name="Search" size="24" color="primary" />
                 <div class="flex-1">
@@ -1565,6 +1567,7 @@ const handleExampleChange = (example: string) => {
                     @input="(v) => (searchQuery = v as string)"
                     placeholder="พิมพ์คำค้นหา..."
                     icon="Search"
+                    class="w-full"
                 />
 
                 <div
@@ -1580,7 +1583,7 @@ const handleExampleChange = (example: string) => {
         <!-- Interactive Playground -->
         <section
             v-if="!searchQuery.trim()"
-            class="bg-white rounded-xl shadow-lg p-6 mb-8 w-full"
+            class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 w-full"
         >
             <div class="flex items-center gap-3 mb-6">
                 <BcIcon name="Palette" size="24" color="primary" />
@@ -1592,11 +1595,11 @@ const handleExampleChange = (example: string) => {
                 </div>
             </div>
 
-            <div class="grid gap-y-4">
-                <div class="flex gap-4 flex-col lg:flex-row">
+            <div class="grid gap-4">
+                <div class="flex flex-col sm:flex-row gap-4">
                     <select
                         v-model="selectedExample"
-                        class="px-4 py-2 border rounded"
+                        class="w-full sm:w-auto px-4 py-2 border rounded text-[13px] sm:text-sm"
                         @change="handleExampleChange(selectedExample)"
                     >
                         <option
@@ -1611,12 +1614,13 @@ const handleExampleChange = (example: string) => {
                         variant="primary"
                         icon="RefreshCw"
                         @click="handlerResetExample"
+                        class="w-full sm:w-auto"
                     >
                         ล้างข้อมูล
                     </BcButton>
                 </div>
 
-                <div class="grid bg-slate-800 rounded-lg p-4">
+                <div class="grid bg-slate-800 rounded-lg p-2 sm:p-4">
                     <BcButton
                         @click="copyCode(codeInput)"
                         variant="white"
@@ -1626,7 +1630,7 @@ const handleExampleChange = (example: string) => {
                     />
                     <textarea
                         v-model="codeInput"
-                        class="w-full h-40 font-mono text-sm bg-transparent text-white focus:outline-none"
+                        class="w-full h-40 font-mono text-[13px] sm:text-sm bg-transparent text-white focus:outline-none p-2 sm:p-4"
                     />
                 </div>
 
@@ -1640,9 +1644,9 @@ const handleExampleChange = (example: string) => {
         <template v-for="category in displayResults" :key="category.category">
             <section
                 :id="category?.category?.toLowerCase().replace(/ /g, '-')"
-                class="mb-8"
+                class="mb-6 sm:mb-8 w-full"
             >
-                <div class="flex items-center gap-3 mb-6 pl-4">
+                <div class="flex items-center gap-3 mb-6">
                     <BcIcon name="Code" size="24" color="primary" />
                     <div>
                         <h2 class="text-xl font-bold">
@@ -1654,11 +1658,11 @@ const handleExampleChange = (example: string) => {
                     </div>
                 </div>
 
-                <div class="space-y-6">
+                <div class="space-y-4 sm:space-y-6">
                     <div
                         v-for="func in category?.functions"
                         :key="func.name"
-                        class="bg-white rounded-xl shadow-lg p-6 w-full"
+                        class="bg-white rounded-xl shadow-lg p-4 sm:p-6 w-full"
                     >
                         <h3
                             class="text-lg font-bold mb-2"
@@ -1668,15 +1672,20 @@ const handleExampleChange = (example: string) => {
                             class="text-slate-600 mb-4"
                             v-html="func.highlightedDescription"
                         />
-                        <div class="grid bg-slate-800 rounded-lg p-4">
-                            <BcButton
-                                @click="copyCode(func.code)"
-                                variant="white"
-                                icon="Copy"
-                                class="ml-auto"
-                                size="sm"
-                            />
-                            <pre><code v-html="func.highlightedCode" /></pre>
+                        <div class="bg-slate-800 rounded-lg">
+                            <div class="flex justify-end p-2">
+                                <BcButton
+                                    @click="copyCode(func.code)"
+                                    variant="white"
+                                    icon="Copy"
+                                    size="sm"
+                                />
+                            </div>
+                            <div class="overflow-x-auto">
+                                <pre
+                                    class="text-[13px] sm:text-sm p-2 sm:p-4"
+                                ><code v-html="func.highlightedCode" class="text-[13px] sm:text-sm" /></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1686,7 +1695,7 @@ const handleExampleChange = (example: string) => {
         <!-- No Results -->
         <div
             v-if="searchQuery.trim() && !displayResults.length"
-            class="bg-white rounded-xl shadow-lg p-8 text-center"
+            class="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center w-full"
         >
             <BcIcon
                 name="Search"
@@ -1702,31 +1711,39 @@ const handleExampleChange = (example: string) => {
 </template>
 
 <style scoped>
-/* Existing styles ... */
+/* Base styles */
+:deep(*) {
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+}
 
 /* Code block styling */
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
-    background-color: rgb(30 41 59); /* slate-800 */
-    color: #e2e8f0; /* slate-200 */
-    padding: 1rem;
-    border-radius: 0.5rem;
+    font-family: ui-monospace, monospace;
+    background-color: rgb(30 41 59);
+    color: #e2e8f0;
     margin: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 90vh;
 }
 
 code {
     font-family: inherit;
     color: #fff;
+    display: inline-block;
+    min-width: 100%;
 }
 
 /* Style for inline code */
 :deep(code:not(pre code)) {
-    background-color: rgb(241 245 249); /* slate-100 */
-    color: rgb(71 85 105); /* slate-600 */
+    background-color: rgb(241 245 249);
+    color: rgb(71 85 105);
     padding: 0.2rem 0.4rem;
     border-radius: 0.25rem;
-    font-size: 0.875rem;
+    font-size: inherit;
 }
 
 /* Syntax highlighting colors */
@@ -1753,19 +1770,56 @@ code {
     color: #79c0ff;
 }
 
-/* Make copy button more visible */
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    :deep(*) {
+        -webkit-text-size-adjust: none !important;
+        text-size-adjust: none !important;
+    }
+
+    pre,
+    code,
+    textarea {
+        font-size: 13px !important;
+    }
+
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto;
+    }
+}
+
+/* Scrollbar styling */
+.overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+/* Copy button styling */
 .bg-slate-800 :deep(.bg-white) {
     --tw-bg-opacity: 1;
     background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-    color: rgb(30 41 59); /* slate-800 */
+    color: rgb(30 41 59);
 }
 
-/* Improve button hover state */
 .bg-slate-800 :deep(.bg-white:hover) {
     --tw-bg-opacity: 0.9;
 }
 
-/* Section scroll margin */
+/* Section margin */
 section {
     scroll-margin-top: 6rem;
 }
@@ -1778,18 +1832,19 @@ section {
     font-weight: 500;
 }
 
-/* Search highlight in code blocks */
 pre :deep(mark) {
     background-color: rgba(254, 243, 199, 0.2);
     color: inherit;
 }
 
-/* Interactive playground textarea */
-textarea.code-input {
-    background-color: rgb(30 41 59);
-    color: #e2e8f0;
-    width: 100%;
-    resize: vertical;
-    min-height: 150px;
+/* Button and input spacing */
+.flex-col > * + * {
+    margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .flex-col > * + * {
+        margin-top: 0;
+    }
 }
 </style>
