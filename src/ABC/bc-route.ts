@@ -5,7 +5,7 @@ const routeBc: RouteRecordRaw = {
     component: () => import('@/ABC/pages/directives/doc_adc_directives.vue'),
     meta: {
         group: 'BC',
-        title: 'app components',
+        title: 'directives',
     },
 }
 
