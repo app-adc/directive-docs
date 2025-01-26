@@ -450,15 +450,81 @@ const result = copyDeep(obj)
     ADC: {
         template: `import { ADC } from 'adc-directive'
 
-const api = new ADC<RequestType, ResponseType>()
-const response = await api.request({
-  baseURL: 'https://api.example.com',
-  method: 'POST',
-  variables: { id: 1 },
-  storage: 'cache',
-  timeToLive: 60000
-})`,
-        description: 'จัดการ HTTP requests พร้อม caching',
+// Define Types
+type Post = {
+   userId: number
+   id: number
+   title: string
+   body: string
+}
+
+// Create API instance with type safety
+const api = new ADC<{}, Post>()
+const BASE_URL = 'https://api.example.com/posts'
+
+// Example 1: Basic GET with Cache
+const post = ref<Post>({} as Post)
+
+async function fetchPost(id: number) {
+   const response = await api.get({
+       baseURL: \`\${BASE_URL}/\${id}\`,
+       storage: 'session',        // Use sessionStorage
+       timeToLive: 1000 * 5,     // Cache for 5 seconds
+       headers: {
+           token: 'bearer token'  // Custom headers
+       },
+       beforeEach: [             // Hooks before processing response
+           (res: Post) => {
+               console.log('Response:', res)
+           }
+       ]
+   })
+   post.value = response
+}
+
+// Example 2: Pagination
+let currentId = ref(1)
+
+async function fetchNext() {
+   currentId.value = currentId.value < 10 ? currentId.value + 1 : 1
+   await fetchPost(currentId.value)
+}
+
+async function fetchPrev() {
+   currentId.value = currentId.value > 1 ? currentId.value - 1 : 10
+   await fetchPost(currentId.value)
+}
+
+// Example 3: GraphQL Query
+const graphqlResponse = await api.request({
+   baseURL: '\${BASE_URL}/graphql',
+   method: 'POST',
+   query: \`
+       query GetPost($id: ID!) {
+           post(id: $id) {
+               id title body
+           }
+       }
+   \`,
+   variables: { id: currentId.value }
+})
+
+// Example 4: Error Handling
+try {
+   const response = await api.post({
+       baseURL: \`\${BASE_URL}/create\`,
+       variables: {
+           title: 'New Post',
+           body: 'Content'
+       }
+   })
+} catch (error) {
+   if (error instanceof HttpError) {
+       console.error(\`HTTP Error: \${error.status} \${error.statusText}\`)
+   }
+}`,
+        description:
+            'HTTP Client ที่รองรับ REST/GraphQL พร้อมระบบ caching และ type safety',
     },
 
     // Function Composition
@@ -726,43 +792,82 @@ const response = await api.request({
     },
     {
         category: 'HTTP Utilities',
-        description: 'ฟังก์ชันสำหรับจัดการ HTTP Requests',
+        description: 'ฟังก์ชันสำหรับจัดการ HTTP Requests และ Caching',
         functions: [
             {
-                name: 'ADC',
-                description:
-                    'Client สำหรับจัดการ HTTP requests พร้อมระบบ caching อัตโนมัติ',
-                code: `const api = new ADC<RequestType, ResponseType>()
+                name: 'ADC Client',
+                description: 'HTTP Client ที่รองรับทั้ง REST API และ GraphQL',
+                code: `// 1. Setup with TypeScript
+type Post = {
+   userId: number
+   id: number
+   title: string
+   body: string
+}
 
-// Basic request
+const api = new ADC<{}, Post>()
+const BASE_URL = 'https://api.example.com/posts'
+
+// 2. GET Request with Caching 
+const post = await api.get({
+   baseURL: \`\${BASE_URL}/1\`,
+   storage: 'session',        // session, cache, localStorage
+   timeToLive: 5000,         // cache 5 วินาที
+   headers: {
+       token: 'bearer token'
+   }
+})
+
+// 3. POST Request
+const newPost = await api.post({
+   baseURL: BASE_URL,
+   variables: {
+       title: 'New Post',
+       body: 'Content'  
+   }
+})
+
+// 4. Custom Request Hooks
 const response = await api.request({
-  baseURL: 'https://api.example.com',
-  method: 'POST',
-  variables: { id: 1 }
+   baseURL: \`\${BASE_URL}/1\`,
+   beforeEach: [             // ทำงานก่อน process response
+       (res) => console.log('Raw response:', res)
+   ],
+   interceptors: [          // แปลงข้อมูลก่อน return
+       (res) => ({
+           ...res,
+           title: res.title.toUpperCase()
+       })
+   ]
 })
 
-// Request with caching
-const cachedResponse = await api.request({
-  baseURL: 'https://api.example.com',
-  method: 'GET',
-  storage: 'cache',
-  timeToLive: 60000, // 1 minute
-  variables: { id: 1 }
-})
-
-// GraphQL request
+// 5. GraphQL Query
 const graphqlResponse = await api.request({
-  baseURL: 'https://api.example.com/graphql',
-  query: \`
-    query GetUser($id: ID!) {
-      user(id: $id) {
-        name
-        email
-      }
-    }
-  \`,
-  variables: { id: 1 }
-})`,
+   baseURL: \`\${BASE_URL}/graphql\`,
+   query: \`
+       query GetPosts($limit: Int!) {
+           posts(limit: $limit) {
+               id title body
+           }
+       }
+   \`,
+   variables: { limit: 10 }
+})
+
+// 6. Error Handling
+try {
+   const response = await api.request({
+       baseURL: 'invalid-url',
+       method: 'GET'
+   })
+} catch (error) {
+   if (error instanceof HttpError) {
+       console.error(\`
+           Status: \${error.status}
+           Message: \${error.statusText}
+       \`)
+   }
+}`,
             },
         ],
     },
