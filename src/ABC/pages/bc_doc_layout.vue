@@ -3,6 +3,8 @@ import type { IconName } from '@/ABC/bc-types'
 import BcIcon from '@/ABC/components/BcIcon.vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
+// Import the version from package.json
+import { version } from '../../../package.json'
 
 // Types
 type MenuItem = {
@@ -256,9 +258,15 @@ const {
                         class="flex items-center gap-2"
                     >
                         <BcIcon name="Box" size="24" color="primary" />
-                        <h1 class="text-lg font-bold text-slate-800">
-                            {{ title }}
-                        </h1>
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-800">
+                                {{ title }}
+                            </h1>
+                            <!-- Version display added here -->
+                            <div class="text-xs text-slate-500">
+                                v{{ version }}
+                            </div>
+                        </div>
                     </div>
                 </transition>
                 <button
@@ -374,6 +382,12 @@ const {
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
+                        <!-- Added version display in header -->
+                        <div
+                            class="text-xs px-2 py-1 bg-primary/10 text-primary rounded-md"
+                        >
+                            v{{ version }}
+                        </div>
                         <slot name="actions" />
                     </div>
                 </div>
@@ -393,7 +407,8 @@ const {
                 <slot name="footer">
                     <div class="text-sm text-slate-500 text-center">
                         © {{ new Date().getFullYear() }} ABC Components. All
-                        rights reserved.
+                        rights reserved. |
+                        <span class="font-medium">v{{ version }}</span>
                     </div>
                 </slot>
             </footer>
