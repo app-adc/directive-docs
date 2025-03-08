@@ -18,6 +18,24 @@ const codeInput = ref('')
 // ตัวอย่างโค้ดสำหรับ playground
 const examples = {
     // Array Utilities
+
+    range: {
+        template: `import { range } from 'adc-directive'
+
+// สร้าง array ของตัวเลขจาก 1 ถึง 5
+const result1 = range(1, 5)
+// Expected: [1, 2, 3, 4, 5]
+
+// สร้าง array ของตัวเลขจาก 5 ถึง 1 (ลดลง)
+const result2 = range(5, 1)
+// Expected: [5, 4, 3, 2, 1]
+
+// สร้าง array ของตัวเลขจาก 1 ถึง 10 เพิ่มขึ้นทีละ 2
+const result3 = range(1, 10, 2)
+// Expected: [1, 3, 5, 7, 9]`,
+        description: 'สร้าง array ของตัวเลขในช่วงที่กำหนด',
+    },
+
     mapArray: {
         template: `import { mapArray } from 'adc-directive'
 
@@ -190,6 +208,33 @@ const result = dateToCombine(new Date('2024-01-01'))
     },
 
     // Date Manipulation
+    // เพิ่มที่ Date Manipulation
+    addYear: {
+        template: `import { addYear } from 'adc-directive'
+
+const result = addYear(new Date('2024-01-01'), 3)
+// Expected: 2027-01-01`,
+        description: 'เพิ่มหรือลดจำนวนปี',
+    },
+
+    addMoment: {
+        template: `import { addMoment } from 'adc-directive'
+
+// เพิ่ม 1 ปี 2 เดือน 3 วัน 4 ชั่วโมง 5 นาที
+const result = addMoment(new Date('2024-01-01'), {
+  years: 1,
+  months: 2,
+  days: 3,
+  hours: 4,
+  minutes: 5
+})
+// Expected: 2025-03-04 04:05:00
+
+// เพิ่มเฉพาะบางหน่วย
+const dateNextYear = addMoment(new Date(), { years: 1 })`,
+        description: 'เพิ่มค่าหน่วยเวลาหลายหน่วยให้กับวันที่พร้อมกัน',
+    },
+
     addDate: {
         template: `import { addDate } from 'adc-directive'
 
@@ -223,6 +268,20 @@ const result = addMinute(new Date('2024-01-01 10:00'), 30)
     },
 
     // Object Utilities
+    mergeWithUndefined: {
+        template: `import { mergeWithUndefined } from 'adc-directive'
+
+const newObj = { a: 1, b: undefined, c: { d: 2 } }
+const oldObj = { a: 10, b: 20, c: { d: 20, e: 30 } }
+const result = mergeWithUndefined(newObj, oldObj)
+/* Expected: {
+  a: 1,           // ใช้ค่าจาก newObj
+  b: 20,          // ใช้ค่าจาก oldObj เพราะใน newObj เป็น undefined
+  c: { d: 2, e: 30 }  // รวม nested objects
+} */`,
+        description:
+            'รวม object เข้าด้วยกัน โดยใช้ค่าจาก oldObj เมื่อ newObj เป็น undefined',
+    },
     mergeObject: {
         template: `import { mergeObject } from 'adc-directive'
 
@@ -240,44 +299,6 @@ const obj = { user: { profile: { name: 'John' } } }
 const exists = findObjectByKey(obj, ['user.profile.name'])
 // Expected: true`,
         description: 'ค้นหา key ใน object แบบ nested',
-    },
-
-    createObj: {
-        template: `import { createObj } from 'adc-directive'
-
-const obj = { user: { profile: { name: 'John' } } }
-const result = createObj(obj, 'user.profile')
-// Expected: { user: { profile: { name: 'John' } } }`,
-        description: 'สร้าง object จาก path',
-    },
-
-    selectObject: {
-        template: `import { selectObject } from 'adc-directive'
-
-const obj = { id: 1, name: 'John', age: 30 }
-const result = selectObject(obj, ['id', 'name'])
-// Expected: { id: 1, name: 'John' }`,
-        description: 'เลือกเฉพาะบาง keys จาก object',
-    },
-
-    checkNestedValue: {
-        template: `import { checkNestedValue } from 'adc-directive'
-
-const data = {
-  user: {
-    profile: {
-      name: 'John',
-      hobbies: ['reading', 'gaming']
-    }
-  }
-}
-
-const result = checkNestedValue(data, {
-  'user.profile.name': 'John',
-  'user.profile.hobbies': ['reading', 'gaming']
-})
-// Expected: true`,
-        description: 'ตรวจสอบค่าใน nested object อย่างละเอียด',
     },
 
     mapToKeys: {
@@ -347,6 +368,28 @@ const result = toPayloadByKey(items, item => item.id)
     },
 
     // Validation Utilities
+    validateTag: {
+        template: `import { validateTag } from 'adc-directive'
+
+// สร้างฟังก์ชันตรวจสอบค่าบวก
+const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
+
+// ใช้ฟังก์ชันตรวจสอบ
+const result1 = isPositive(5)
+// Expected: { value: 5, tag: '' }
+
+const result2 = isPositive(-3)
+// Expected: { value: undefined, tag: 'NUMBER_MUST_BE_POSITIVE' }
+
+// สร้างฟังก์ชันตรวจสอบอีเมล
+const isValidEmail = validateTag<string>(
+  email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+)('INVALID_EMAIL_FORMAT')
+
+const emailResult = isValidEmail('test@example.com')
+// Expected: { value: 'test@example.com', tag: '' }`,
+        description: 'สร้างฟังก์ชันตรวจสอบค่าในรูปแบบ functional composition',
+    },
     validateObject: {
         template: `import { validateObject } from 'adc-directive'
 
@@ -411,11 +454,18 @@ const result2 = checkFormatDate('01/01/2024', 'DD/MM/YYYY')
     runProcess: {
         template: `import { runProcess } from 'adc-directive'
 
-const items = [1, 2, 3]
+const items = ['A', 'B', 'C', 'D', 'E']
+
+// ประมวลผลทั้ง array
 runProcess(items, (item, index) => {
-  console.log(\`Processing item \${item} at index \${index}\`)
-}, 0)`,
-        description: 'ทำงานกับ array แบบมีลำดับขั้นตอน',
+  console.log(\`Item \${index}: \${item}\`)
+})
+
+// ประมวลผลเฉพาะช่วง
+runProcess(items, (item, index) => {
+  console.log(\`Item \${index}: \${item}\`)
+}, 1, 3)  // เริ่มจาก index 1 (B) ถึง index 3 (D)`,
+        description: 'ทำงานกับ array โดยสามารถกำหนดช่วงการทำงานได้',
     },
 
     delayPromise: {
@@ -528,6 +578,63 @@ try {
     },
 
     // Function Composition
+    ciTag: {
+        template: `import { ciTag, validateTag, withTag } from 'adc-directive'
+
+// สร้างฟังก์ชันตรวจสอบและแปลงค่า
+const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
+const double = (x: number) => x * 2
+const toString = withTag((x: number) => String(x))(x => x !== 0)('CANNOT_CONVERT_ZERO')
+
+// ใช้ ciTag เพื่อต่อการทำงานพร้อมจัดการ errors
+const result = ciTag(
+  5,
+  isPositive,  // ผ่านการตรวจสอบ
+  double,      // ได้ 10
+  toString     // ได้ "10"
+)
+/* Expected: {
+  value: "10",
+  tag: "",
+  beforeValue: 10,
+  logs: [...],  // บันทึกการทำงานแต่ละขั้นตอน
+  ci: { value: "10", tag: "" }
+} */
+
+// ตัวอย่างที่ fail validation
+const failedResult = ciTag(
+  -5,
+  isPositive,  // ไม่ผ่านการตรวจสอบ
+  double,
+  toString
+)
+/* Expected: {
+  value: undefined,
+  tag: "NUMBER_MUST_BE_POSITIVE",
+  beforeValue: -5,
+  logs: [...],
+  ci: { value: undefined, tag: "NUMBER_MUST_BE_POSITIVE" }
+} */`,
+        description: 'Chain functions พร้อมจัดการ errors และเก็บ logs',
+    },
+
+    withTag: {
+        template: `import { withTag } from 'adc-directive'
+
+// สร้างฟังก์ชันที่ตรวจสอบและแปลงค่า
+const square = withTag(
+  (x: number) => x * x           // callback function
+)((x: number) => !isNaN(x))      // validation function
+('INVALID_NUMBER')              // error tag
+
+// ใช้งานฟังก์ชัน
+const result1 = square(5)      
+// Expected: { value: 25, tag: '' }
+
+const result2 = square(NaN)
+// Expected: { value: undefined, tag: 'INVALID_NUMBER' }`,
+        description: 'สร้างฟังก์ชันที่รวมการตรวจสอบเงื่อนไขและแปลงค่า',
+    },
     ci: {
         template: `import { ci } from 'adc-directive'
 
@@ -877,6 +984,18 @@ try {
         description: 'ฟังก์ชันสำหรับจัดการข้อมูลแบบ Array',
         functions: [
             {
+                name: 'range',
+                description: 'สร้าง array ของตัวเลขในช่วงที่กำหนด',
+                code: `const result1 = range(1, 5)
+// Result: [1, 2, 3, 4, 5]
+
+const result2 = range(5, 1)
+// Result: [5, 4, 3, 2, 1]
+
+const result3 = range(1, 10, 2)
+// Result: [1, 3, 5, 7, 9]`,
+            },
+            {
                 name: 'mapArray',
                 description:
                     'แปลง Array ทุกตัวให้อยู่ในระดับเดียวกัน (Flatten Nested Arrays)',
@@ -924,6 +1043,20 @@ const hasDuplicateId = checkItemDuplicate(users, user => user.id)
         description: 'ฟังก์ชันสำหรับจัดการข้อมูลแบบ Object',
         functions: [
             {
+                name: 'mergeWithUndefined',
+                description:
+                    'รวม object เข้าด้วยกัน โดยใช้ค่าจาก oldObj เมื่อ newObj เป็น undefined',
+                code: `const newObj = { a: 1, b: undefined, c: { d: 2 } }
+const oldObj = { a: 10, b: 20, c: { d: 20, e: 30 } }
+
+const result = mergeWithUndefined(newObj, oldObj)
+/* Result: {
+  a: 1,           // ใช้ค่าจาก newObj
+  b: 20,          // ใช้ค่าจาก oldObj เพราะใน newObj เป็น undefined
+  c: { d: 2, e: 30 }  // รวม nested objects
+} */`,
+            },
+            {
                 name: 'mergeObject',
                 description: 'รวม Object หลายตัวเข้าด้วยกันแบบ Deep Merge',
                 code: `const obj1 = {
@@ -961,62 +1094,12 @@ const hasName = findObjectByKey(data, ['user.profile.name'])
 const hasAge = findObjectByKey(data, ['user.profile.age'])
 // Result: false`,
             },
-            {
-                name: 'selectObject',
-                description: 'เลือกเฉพาะ Keys ที่ต้องการจาก Object',
-                code: `const data = {
-  id: 1,
-  name: 'John',
-  age: 30,
-  email: 'john@example.com'
-}
 
-const selected = selectObject(data, ['id', 'name'])
-// Result: { id: 1, name: 'John' }`,
-            },
-            {
-                name: 'createObj',
-                description: 'สร้าง Object จาก Path String',
-                code: `const base = {
-  user: {
-    profile: {
-      name: 'John'
-    }
-  }
-}
-
-const newObj = createObj(base, 'user.profile')
-/* Result: {
-  user: {
-    profile: {
-      name: 'John'
-    }
-  }
-} */`,
-            },
             {
                 name: 'mapToKeys',
                 description: 'แปลง Path String เป็น Array ของ Keys',
                 code: `const result = mapToKeys('profile.name.colors[2].length')
 // Result: ['profile', 'name', 'colors', '2', 'length']`,
-            },
-            {
-                name: 'checkNestedValue',
-                description: 'ตรวจสอบค่าใน Nested Object',
-                code: `const data = {
-  user: {
-    profile: {
-      name: 'John',
-      hobbies: ['reading', 'gaming']
-    }
-  }
-}
-
-const result = checkNestedValue(data, {
-  'user.profile.name': 'John',
-  'user.profile.hobbies': ['reading', 'gaming']
-})
-// Result: true`,
             },
         ],
     },
@@ -1025,6 +1108,20 @@ const result = checkNestedValue(data, {
         category: 'Validation Functions',
         description: 'ฟังก์ชันสำหรับตรวจสอบความถูกต้องของข้อมูล',
         functions: [
+            {
+                name: 'validateTag',
+                description:
+                    'สร้างฟังก์ชันตรวจสอบค่าในรูปแบบ functional composition',
+                code: `// สร้างฟังก์ชันตรวจสอบค่าบวก
+const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
+
+// ใช้ฟังก์ชันตรวจสอบ
+const result1 = isPositive(5)
+// Result: { value: 5, tag: '' }
+
+const result2 = isPositive(-3)
+// Result: { value: undefined, tag: 'NUMBER_MUST_BE_POSITIVE' }`,
+            },
             {
                 name: 'validateObject',
                 description: 'ตรวจสอบความถูกต้องของ Keys ใน Object',
@@ -1125,6 +1222,37 @@ checkFormatDate('2024-13-01', 'YYYY-MM-DD')   // false`,
         category: 'Date Functions',
         description: 'ฟังก์ชันสำหรับจัดการวันที่และเวลา',
         functions: [
+            {
+                name: 'addYear',
+                description: 'เพิ่มหรือลดจำนวนปี',
+                code: `const date = new Date('2024-01-01')
+
+// เพิ่ม 3 ปี
+const future = addYear(date, 3)
+// Result: 2027-01-01
+
+// ลด 2 ปี
+const past = addYear(date, -2)
+// Result: 2022-01-01`,
+            },
+            {
+                name: 'addMoment',
+                description: 'เพิ่มค่าหน่วยเวลาหลายหน่วยให้กับวันที่พร้อมกัน',
+                code: `// เพิ่ม 1 ปี 2 เดือน 3 วัน 4 ชั่วโมง 5 นาที
+const result = addMoment(new Date('2024-01-01'), {
+  years: 1,
+  months: 2,
+  days: 3,
+  hours: 4,
+  minutes: 5
+})
+// Result: 2025-03-04 04:05:00
+
+// เพิ่มเฉพาะบางหน่วย
+const dateNextYear = addMoment(new Date(), { years: 1 })
+const dateNextMonth = addMoment(new Date(), { months: 1 })`,
+            },
+
             {
                 name: 'dateDiff',
                 description: 'คำนวณความต่างระหว่างวันที่',
@@ -1419,6 +1547,43 @@ const copy = copyDeep(original)
         description:
             'ฟังก์ชันสำหรับ Function Composition และ Higher-Order Functions',
         functions: [
+            {
+                name: 'ciTag',
+                description: 'Chain functions พร้อมจัดการ errors และเก็บ logs',
+                code: `const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
+const double = (x: number) => x * 2
+const toString = withTag((x: number) => String(x))(x => x !== 0)('CANNOT_CONVERT_ZERO')
+
+// ใช้ ciTag เพื่อต่อการทำงานพร้อมจัดการ errors
+const result = ciTag(
+  5,
+  isPositive,  // ผ่านการตรวจสอบ
+  double,      // ได้ 10
+  toString     // ได้ "10"
+)
+/* Result: {
+  value: "10",
+  tag: "",
+  beforeValue: 10,
+  logs: [...],  // บันทึกการทำงานแต่ละขั้นตอน
+} */`,
+            },
+            {
+                name: 'withTag',
+                description: 'สร้างฟังก์ชันที่รวมการตรวจสอบเงื่อนไขและแปลงค่า',
+                code: `// สร้างฟังก์ชันที่ตรวจสอบและแปลงค่า
+const square = withTag(
+  (x: number) => x * x           // callback function
+)((x: number) => !isNaN(x))      // validation function
+('INVALID_NUMBER')              // error tag
+
+// ใช้งานฟังก์ชัน
+const result1 = square(5)      
+// Result: { value: 25, tag: '' }
+
+const result2 = square(NaN)
+// Result: { value: undefined, tag: 'INVALID_NUMBER' }`,
+            },
             {
                 name: 'ci',
                 description: 'เชื่อมต่อการทำงานของหลายฟังก์ชันเข้าด้วยกัน',
