@@ -268,6 +268,46 @@ const result = addMinute(new Date('2024-01-01 10:00'), 30)
     },
 
     // Object Utilities
+    selectObject: {
+        template: `import { selectObject } from 'adc-directive'
+
+const user = {
+  id: 1,
+  name: 'John Doe',
+  profile: {
+    job: {
+      title: 'Developer',
+      salary: 50000
+    },
+    contact: {
+      email: 'john@example.com',
+      phone: '123-456-7890'
+    }
+  },
+  finance: {
+    salary: 60000,
+    accounts: ['123456', '789012']
+  }
+}
+
+// เลือกเฉพาะบาง properties
+const result = selectObject(user, [
+  'profile.job.salary',
+  'finance.salary'
+])
+
+/* Expected: {
+  profile: {
+    job: {
+      salary: 50000
+    }
+  },
+  finance: {
+    salary: 60000
+  }
+} */`,
+        description: 'สร้าง object ใหม่โดยเลือกเฉพาะ properties ที่ต้องการ',
+    },
     mergeWithUndefined: {
         template: `import { mergeWithUndefined } from 'adc-directive'
 
@@ -369,26 +409,45 @@ const result = toPayloadByKey(items, item => item.id)
 
     // Validation Utilities
     validateTag: {
-        template: `import { validateTag } from 'adc-directive'
+        template: `import { validateTag, left, right } from 'adc-directive'
 
 // สร้างฟังก์ชันตรวจสอบค่าบวก
 const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
 
 // ใช้ฟังก์ชันตรวจสอบ
 const result1 = isPositive(5)
-// Expected: { value: 5, tag: '' }
+// { tag: 'right', right: 5 }
 
 const result2 = isPositive(-3)
-// Expected: { value: undefined, tag: 'NUMBER_MUST_BE_POSITIVE' }
+// { tag: 'left', left: 'NUMBER_MUST_BE_POSITIVE' }
 
 // สร้างฟังก์ชันตรวจสอบอีเมล
 const isValidEmail = validateTag<string>(
-  email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  email => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)
 )('INVALID_EMAIL_FORMAT')
 
 const emailResult = isValidEmail('test@example.com')
-// Expected: { value: 'test@example.com', tag: '' }`,
-        description: 'สร้างฟังก์ชันตรวจสอบค่าในรูปแบบ functional composition',
+// { tag: 'right', right: 'test@example.com' }
+
+// การใช้งานในสถานการณ์จริง
+const validateUser = (user: any) => {
+  // ตรวจสอบหลายเงื่อนไขและ return เมื่อเจอ error แรก
+  const nameCheck = validateTag<string>(
+    name => name && name.length >= 2
+  )('NAME_TOO_SHORT')(user.name)
+
+  if (nameCheck.tag === 'left') return nameCheck
+
+  const ageCheck = validateTag<number>(
+    age => age && age > 18
+  )('AGE_MUST_BE_OVER_18')(user.age)
+
+  if (ageCheck.tag === 'left') return ageCheck
+
+  // ถ้าผ่านทุกเงื่อนไข
+  return right(user)
+}`,
+        description: 'สร้างฟังก์ชันตรวจสอบค่าแบบ functional programming',
     },
     validateObject: {
         template: `import { validateObject } from 'adc-directive'
@@ -578,13 +637,75 @@ try {
     },
 
     // Function Composition
+    left: {
+        template: `import { left, right, Tag } from 'adc-directive'
+
+// Tag เป็น type ที่มีสองกรณี: Left (error) หรือ Right (success)
+type Tag<L, R> = Left<L> | Right<R>
+type Left<L> = { tag: 'left'; left: L }
+type Right<R> = { tag: 'right'; right: R }
+
+// ฟังก์ชันที่อาจเกิด error
+function divide(a: number, b: number): Tag<string, number> {
+  if (b === 0) {
+    return left('Division by zero') // สร้าง error
+  }
+  return right(a / b) // สร้างค่าที่สำเร็จ
+}
+
+// ทดสอบใช้งาน
+const result1 = divide(10, 2)  // { tag: 'right', right: 5 }
+const result2 = divide(10, 0)  // { tag: 'left', left: 'Division by zero' }
+
+// ตรวจสอบผลลัพธ์
+if (result1.tag === 'right') {
+  console.log(\`Result: \${result1.right}\`)
+} else {
+  console.log(\`Error: \${result1.left}\`)
+}`,
+        description: 'สร้าง error state ในรูปแบบ functional programming',
+    },
+    right: {
+        template: `import { left, right, Tag } from 'adc-directive'
+
+// ฟังก์ชันที่คืนค่า success
+function findUser(id: number): Tag<string, { id: number, name: string }> {
+  // สมมติว่ามีการค้นหาผู้ใช้ในฐานข้อมูล
+  if (id > 0) {
+    return right({ id, name: \`User\${id}\` }) // พบผู้ใช้ คืนค่า success
+  }
+  return left('User not found') // ไม่พบผู้ใช้ คืนค่า error
+}
+
+// การใช้งานร่วมกันหลายฟังก์ชัน
+function getUserEmailById(id: number): Tag<string, string> {
+  const userResult = findUser(id)
+
+  // เช็คว่าหาผู้ใช้เจอไหม
+  if (userResult.tag === 'left') {
+    return userResult // ส่งต่อ error ไปเลย
+  }
+
+  // หากพบผู้ใช้ ให้หา email (สมมติว่ามีอีกฟังก์ชัน)
+  const user = userResult.right
+  return right(\`\${user.name}@example.com\`)
+}
+
+// ทดสอบใช้งาน
+const email = getUserEmailById(123)
+// { tag: 'right', right: 'User123@example.com' }`,
+        description: 'สร้าง success state ในรูปแบบ functional programming',
+    },
     ciTag: {
-        template: `import { ciTag, validateTag, withTag } from 'adc-directive'
+        template: `import { ciTag, validateTag, left, right } from 'adc-directive'
 
 // สร้างฟังก์ชันตรวจสอบและแปลงค่า
 const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
 const double = (x: number) => x * 2
-const toString = withTag((x: number) => String(x))(x => x !== 0)('CANNOT_CONVERT_ZERO')
+const toString = (x: number) => {
+  if (x === 0) return left('CANNOT_CONVERT_ZERO')
+  return right(String(x))
+}
 
 // ใช้ ciTag เพื่อต่อการทำงานพร้อมจัดการ errors
 const result = ciTag(
@@ -593,48 +714,41 @@ const result = ciTag(
   double,      // ได้ 10
   toString     // ได้ "10"
 )
-/* Expected: {
+/* Output:
+{
   value: "10",
-  tag: "",
+  tag: "right",
+  message: "",
   beforeValue: 10,
-  logs: [...],  // บันทึกการทำงานแต่ละขั้นตอน
-  ci: { value: "10", tag: "" }
-} */
+  logs: [
+    { index: 0, input: 5, output: 5 },
+    { index: 1, input: 5, output: 10 },
+    { index: 2, input: 10, output: "10" }
+  ]
+}
+*/
 
-// ตัวอย่างที่ fail validation
+// ตัวอย่างที่ validation ล้มเหลว
 const failedResult = ciTag(
   -5,
   isPositive,  // ไม่ผ่านการตรวจสอบ
   double,
   toString
 )
-/* Expected: {
+/* Output:
+{
   value: undefined,
-  tag: "NUMBER_MUST_BE_POSITIVE",
+  tag: "left",
+  message: "NUMBER_MUST_BE_POSITIVE",
   beforeValue: -5,
-  logs: [...],
-  ci: { value: undefined, tag: "NUMBER_MUST_BE_POSITIVE" }
-} */`,
+  logs: [
+    { index: 0, input: -5, output: undefined, errorMessage: "NUMBER_MUST_BE_POSITIVE" }
+  ]
+}
+*/`,
         description: 'Chain functions พร้อมจัดการ errors และเก็บ logs',
     },
 
-    withTag: {
-        template: `import { withTag } from 'adc-directive'
-
-// สร้างฟังก์ชันที่ตรวจสอบและแปลงค่า
-const square = withTag(
-  (x: number) => x * x           // callback function
-)((x: number) => !isNaN(x))      // validation function
-('INVALID_NUMBER')              // error tag
-
-// ใช้งานฟังก์ชัน
-const result1 = square(5)      
-// Expected: { value: 25, tag: '' }
-
-const result2 = square(NaN)
-// Expected: { value: undefined, tag: 'INVALID_NUMBER' }`,
-        description: 'สร้างฟังก์ชันที่รวมการตรวจสอบเงื่อนไขและแปลงค่า',
-    },
     ci: {
         template: `import { ci } from 'adc-directive'
 
@@ -915,7 +1029,7 @@ type Post = {
 const api = new ADC<{}, Post>()
 const BASE_URL = 'https://api.example.com/posts'
 
-// 2. GET Request with Caching 
+// 2. GET Request with Caching
 const post = await api.get({
    baseURL: \`\${BASE_URL}/1\`,
    storage: 'session',        // session, cache, localStorage
@@ -930,7 +1044,7 @@ const newPost = await api.post({
    baseURL: BASE_URL,
    variables: {
        title: 'New Post',
-       body: 'Content'  
+       body: 'Content'
    }
 })
 
@@ -1043,6 +1157,112 @@ const hasDuplicateId = checkItemDuplicate(users, user => user.id)
         description: 'ฟังก์ชันสำหรับจัดการข้อมูลแบบ Object',
         functions: [
             {
+                name: 'left',
+                description:
+                    'สร้าง error state ในรูปแบบ functional programming',
+                code: `import { left, right, Tag } from 'adc-directive'
+
+// Tag เป็น type ที่มีสองกรณี: Left (error) หรือ Right (success)
+type Tag<L, R> = Left<L> | Right<R>
+type Left<L> = { tag: 'left'; left: L }
+type Right<R> = { tag: 'right'; right: R }
+
+// ฟังก์ชันที่อาจเกิด error
+function divide(a: number, b: number): Tag<string, number> {
+  if (b === 0) {
+    return left('Division by zero') // สร้าง error
+  }
+  return right(a / b) // สร้างค่าที่สำเร็จ
+}
+
+// ทดสอบใช้งาน
+const result1 = divide(10, 2)  // { tag: 'right', right: 5 }
+const result2 = divide(10, 0)  // { tag: 'left', left: 'Division by zero' }
+
+// ตรวจสอบผลลัพธ์
+if (result1.tag === 'right') {
+  console.log(\`Result: \${result1.right}\`)
+} else {
+  console.log(\`Error: \${result1.left}\`)
+}`,
+            },
+            {
+                name: 'right',
+                description:
+                    'สร้าง success state ในรูปแบบ functional programming',
+                code: `import { left, right, Tag } from 'adc-directive'
+
+// ฟังก์ชันที่คืนค่า success
+function findUser(id: number): Tag<string, { id: number, name: string }> {
+  // สมมติว่ามีการค้นหาผู้ใช้ในฐานข้อมูล
+  if (id > 0) {
+    return right({ id, name: \`User\${id}\` }) // พบผู้ใช้ คืนค่า success
+  }
+  return left('User not found') // ไม่พบผู้ใช้ คืนค่า error
+}
+
+// การใช้งานร่วมกันหลายฟังก์ชัน
+function getUserEmailById(id: number): Tag<string, string> {
+  const userResult = findUser(id)
+  
+  // เช็คว่าหาผู้ใช้เจอไหม
+  if (userResult.tag === 'left') {
+    return userResult // ส่งต่อ error ไปเลย
+  }
+  
+  // หากพบผู้ใช้ ให้หา email (สมมติว่ามีอีกฟังก์ชัน)
+  const user = userResult.right
+  return right(\`\${user.name}@example.com\`)
+}
+
+// ทดสอบใช้งาน
+const email = getUserEmailById(123)
+// { tag: 'right', right: 'User123@example.com' }`,
+            },
+            {
+                name: 'selectObject',
+                description:
+                    'สร้าง object ใหม่โดยเลือกเฉพาะ properties ที่ต้องการ',
+                code: `import { selectObject } from 'adc-directive'
+
+const user = {
+  id: 1,
+  name: 'John Doe',
+  profile: {
+    job: {
+      title: 'Developer',
+      salary: 50000
+    },
+    contact: {
+      email: 'john@example.com',
+      phone: '123-456-7890'
+    }
+  },
+  finance: {
+    salary: 60000,
+    accounts: ['123456', '789012']
+  }
+}
+
+// เลือกเฉพาะบาง properties
+const result = selectObject(user, [
+  'profile.job.salary',
+  'finance.salary'
+])
+
+/* Output:
+{
+  profile: {
+    job: {
+      salary: 50000
+    }
+  },
+  finance: {
+    salary: 60000
+  }
+} */`,
+            },
+            {
                 name: 'mergeWithUndefined',
                 description:
                     'รวม object เข้าด้วยกัน โดยใช้ค่าจาก oldObj เมื่อ newObj เป็น undefined',
@@ -1112,15 +1332,44 @@ const hasAge = findObjectByKey(data, ['user.profile.age'])
                 name: 'validateTag',
                 description:
                     'สร้างฟังก์ชันตรวจสอบค่าในรูปแบบ functional composition',
-                code: `// สร้างฟังก์ชันตรวจสอบค่าบวก
+                code: `import { validateTag, left, right } from 'adc-directive'
+
+// สร้างฟังก์ชันตรวจสอบค่าบวก
 const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
 
 // ใช้ฟังก์ชันตรวจสอบ
 const result1 = isPositive(5)
-// Result: { value: 5, tag: '' }
+// { tag: 'right', right: 5 }
 
 const result2 = isPositive(-3)
-// Result: { value: undefined, tag: 'NUMBER_MUST_BE_POSITIVE' }`,
+// { tag: 'left', left: 'NUMBER_MUST_BE_POSITIVE' }
+
+// สร้างฟังก์ชันตรวจสอบอีเมล
+const isValidEmail = validateTag<string>(
+  email => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)
+)('INVALID_EMAIL_FORMAT')
+
+const emailResult = isValidEmail('test@example.com')
+// { tag: 'right', right: 'test@example.com' }
+
+// การใช้งานในสถานการณ์จริง
+const validateUser = (user: any) => {
+  // ตรวจสอบหลายเงื่อนไขและ return เมื่อเจอ error แรก
+  const nameCheck = validateTag<string>(
+    name => name && name.length >= 2
+  )('NAME_TOO_SHORT')(user.name)
+  
+  if (nameCheck.tag === 'left') return nameCheck
+  
+  const ageCheck = validateTag<number>(
+    age => age && age > 18
+  )('AGE_MUST_BE_OVER_18')(user.age)
+  
+  if (ageCheck.tag === 'left') return ageCheck
+  
+  // ถ้าผ่านทุกเงื่อนไข
+  return right(user)
+}`,
             },
             {
                 name: 'validateObject',
@@ -1550,9 +1799,15 @@ const copy = copyDeep(original)
             {
                 name: 'ciTag',
                 description: 'Chain functions พร้อมจัดการ errors และเก็บ logs',
-                code: `const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
+                code: `import { ciTag, validateTag, left, right } from 'adc-directive'
+
+// สร้างฟังก์ชันตรวจสอบและแปลงค่า
+const isPositive = validateTag<number>(n => n > 0)('NUMBER_MUST_BE_POSITIVE')
 const double = (x: number) => x * 2
-const toString = withTag((x: number) => String(x))(x => x !== 0)('CANNOT_CONVERT_ZERO')
+const toString = (x: number) => {
+  if (x === 0) return left('CANNOT_CONVERT_ZERO')
+  return right(String(x))
+}
 
 // ใช้ ciTag เพื่อต่อการทำงานพร้อมจัดการ errors
 const result = ciTag(
@@ -1561,29 +1816,40 @@ const result = ciTag(
   double,      // ได้ 10
   toString     // ได้ "10"
 )
-/* Result: {
+/* Output:
+{
   value: "10",
-  tag: "",
+  tag: "right",
+  message: "",
   beforeValue: 10,
-  logs: [...],  // บันทึกการทำงานแต่ละขั้นตอน
-} */`,
-            },
-            {
-                name: 'withTag',
-                description: 'สร้างฟังก์ชันที่รวมการตรวจสอบเงื่อนไขและแปลงค่า',
-                code: `// สร้างฟังก์ชันที่ตรวจสอบและแปลงค่า
-const square = withTag(
-  (x: number) => x * x           // callback function
-)((x: number) => !isNaN(x))      // validation function
-('INVALID_NUMBER')              // error tag
+  logs: [
+    { index: 0, input: 5, output: 5 },
+    { index: 1, input: 5, output: 10 },
+    { index: 2, input: 10, output: "10" }
+  ]
+}
+*/
 
-// ใช้งานฟังก์ชัน
-const result1 = square(5)      
-// Result: { value: 25, tag: '' }
-
-const result2 = square(NaN)
-// Result: { value: undefined, tag: 'INVALID_NUMBER' }`,
+// ตัวอย่างที่ validation ล้มเหลว
+const failedResult = ciTag(
+  -5,
+  isPositive,  // ไม่ผ่านการตรวจสอบ
+  double,
+  toString
+)
+/* Output:
+{
+  value: undefined,
+  tag: "left",
+  message: "NUMBER_MUST_BE_POSITIVE",
+  beforeValue: -5,
+  logs: [
+    { index: 0, input: -5, output: undefined, errorMessage: "NUMBER_MUST_BE_POSITIVE" }
+  ]
+}
+*/`,
             },
+
             {
                 name: 'ci',
                 description: 'เชื่อมต่อการทำงานของหลายฟังก์ชันเข้าด้วยกัน',
